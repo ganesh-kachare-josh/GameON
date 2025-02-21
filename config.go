@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	
 	"github.com/joho/godotenv"
@@ -19,10 +18,10 @@ type databaseConfig struct {
 	dbname   string
 }
 
-func initDB(ctx context.Context) (*sql.DB, error) {
+func InitDB(ctx context.Context) (*sql.DB, error) {
 
 	// This loads the .env file
-	err := godotenv.Load() 
+	err := godotenv.Load("../.env") 
 	if err != nil {
 		return nil, errors.New("error in loading .env file")
 	}
@@ -46,12 +45,12 @@ func initDB(ctx context.Context) (*sql.DB, error) {
 		return nil, fmt.Errorf("error in opening database connection: %v", err)
 	}
 
-	err = db.PingContext(ctx)
+	err = db.Ping()
 	if err != nil {
 		return nil, fmt.Errorf("error pinging database: %v", err)
 	}
 
-	log.Println("Database connection established successfully")
+	fmt.Println("Database connection established successfully")
 	return db, nil
 
 }
