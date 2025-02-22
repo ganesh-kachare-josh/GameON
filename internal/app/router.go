@@ -12,6 +12,7 @@ func NewRouter(deps Dependencies) *mux.Router {
 	
 	// Routes.
 	router.HandleFunc("/request/{id}" , request.GetRequestById(deps.RequestService)).Methods(http.MethodGet)
+	router.HandleFunc("/requests" , request.GetAllRequests(deps.RequestService)).Methods(http.MethodGet)
 	return router
 
 } 
