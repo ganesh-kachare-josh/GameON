@@ -8,36 +8,39 @@ import (
 	"os"
 
 	"github.com/joho/godotenv"
-	gameon "github.com/ganesh-kachare-josh/GameON"
+	_ "github.com/lib/pq"
+	database "github.com/ganesh-kachare-josh/GameON"
+	"github.com/ganesh-kachare-josh/GameON/internal/app"
 )
 
 
 func main() {
+
     ctx := context.Background()  
     
-    err := godotenv.Load() 
+
+    err := godotenv.Load("../.env") 
     if err != nil {
-        log.Fatal("Error in loading .env file")
+        log.Fatalf("Error in loading .env file %v" , err)
         return 
     }
-
-	sql , err := gameon.initDB(ctx) 
-
+    
+	// Setting the database.
+	sql , err := database.InitDB(ctx) 
 	if err != nil {
-		fmt.Errorf("Error Occured while initializing database : %v", err)
+		log.Fatalf("error Occured while initializing database : %v", err)
 		return 
 	} 
+	
+	// Injecting dependencies.
+    services := app.NewServices(sql) 
+	router := app.NewRouter(services) 
 
-	err = sql.Ping() 
-	if err != nil {
-		log.Fatal(err)
+	srv := &http.Server {
+		Addr: ":" + os.Getenv("port"),
+		Handler: router,
 	}
-	fmt.Println("Connected to the database") 
 
-
-
-	// Start the server 
-	path := os.Getenv(db_host) + ":" + os.Getenv(db_port) 
-	log.Fatal(http.ListenAndServe( path , nil ))
-	fmt.Println("Server is running on port ")
+	fmt.Printf("Server is running on port : %v" , os.Getenv("port")) 
+	log.Fatal(srv.ListenAndServe())
 }
