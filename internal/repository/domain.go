@@ -21,5 +21,8 @@ type Request struct {
 }
 
 
+var Requests []Request 
+
+
 
 
