@@ -11,6 +11,7 @@ type service struct {
 
 type Service interface {
 	GetRequestById(ctx context.Context , request_id int) (Request , error) 
+	GetAllRequests(ctx context.Context) ([]repository.Request , error)
 }
 
 func (s *service ) GetRequestById(ctx context.Context , request_id int) (Request , error) {
@@ -20,6 +21,15 @@ func (s *service ) GetRequestById(ctx context.Context , request_id int) (Request
 		}
 		return Request(request) , nil 
 }
+
+func (s *service ) GetAllRequests(ctx context.Context) ([]repository.Request , error) {
+	    requests , err := s.requestRepo.GetAllRequests(ctx) 
+		if err != nil {
+			return []repository.Request{} , err 
+		}
+		return  requests, nil 
+}
+
 
 func NewService(requestRepo repository.RepoPerson) (Service) {
       return &service{

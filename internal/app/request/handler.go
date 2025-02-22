@@ -37,3 +37,23 @@ func GetRequestById(requestService Service)(func (w http.ResponseWriter , r *htt
 		}		
 	}
 }
+
+func GetAllRequests(requestService Service)(func (w http.ResponseWriter , r *http.Request)) {
+	return func(w http.ResponseWriter , r *http.Request) {
+		ctx := r.Context() 
+
+		response , err := requestService.GetAllRequests(ctx) 
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusInternalServerError)
+			return 
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK) 
+		
+		err = json.NewEncoder(w).Encode(response)
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusInternalServerError)
+		}		
+	}
+}

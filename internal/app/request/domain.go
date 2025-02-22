@@ -18,3 +18,4 @@ type Request struct {
 	CourtPrice  float64             `json:"CourtPrice"`
 	Status      string              `json:"Status"`	
 }
+
