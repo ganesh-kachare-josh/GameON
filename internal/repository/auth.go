@@ -78,6 +78,6 @@ func (ra repoAuth) Register(ctx context.Context, requestBody Register) (Register
 		return Register{}, err
 	}
 
-	requestBody.Password = originalPassword // Reassigning original password to requestBody.
+	register.Password = originalPassword // Reassigning original password to requestBody.
 	return register, nil
 }
