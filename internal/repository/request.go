@@ -51,7 +51,3 @@ func (rp repoPerson) GetAllRequests(ctx context.Context) ([]Request , error) {
     
 	return requests , nil 
 }
-
-
-
-
