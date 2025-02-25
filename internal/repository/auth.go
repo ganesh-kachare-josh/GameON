@@ -10,7 +10,7 @@ import (
 	"github.com/lib/pq"
 )
 
-const registerUserQuery = "INSERT INTO users (name , email , password , phone_number , sports , created_at) VALUES ($1 , $2 , $3 , $4 , $5 , NOW()) RETURNING name , email , password , phone_number , sports , created_at"
+const registerUserQuery = "INSERT INTO users (name , email , password , phone_number , sports , created_at) VALUES ($1 , $2 , $3 , $4 , $5 , NOW()) RETURNING id , name , email , password , phone_number , sports , created_at"
 
 type repoAuth struct {
 	DB *sql.DB
@@ -32,7 +32,7 @@ func (ra repoAuth) Login(ctx context.Context, requestBody Login) (Login, error) 
 	var login Login
 	originalPassword := requestBody.Password
 
-	err := db.Get(&login, "SELECT email , password FROM users WHERE email = $1", requestBody.Email)
+	err := db.Get(&login, "SELECT id , email , password FROM users WHERE email = $1", requestBody.Email)
 	if err != nil {
 		return Login{}, errors.New("incorrect email")
 	}
