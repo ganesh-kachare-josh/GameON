@@ -36,3 +36,11 @@ type Register struct {
 	Sport        json.RawMessage `db:"sports"`
 	Created_at   string          `db:"created_at"`
 }
+
+type ParticipantData struct {
+	Id     int    `db:"id"`
+	UserId int    `db:"user_id"`
+	Status string `db:"status"`
+}
+
+var Participants []ParticipantData
