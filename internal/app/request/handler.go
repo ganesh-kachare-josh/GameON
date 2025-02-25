@@ -57,3 +57,32 @@ func GetAllRequests(requestService Service)(func (w http.ResponseWriter , r *htt
 		}		
 	}
 }
+
+func GetAllParticipants(participantService Service) (func (w http.ResponseWriter , r *http.Request)) {
+	return func(w http.ResponseWriter , r *http.Request) {
+		ctx := r.Context() 
+
+		vars := mux.Vars(r)
+		id := vars["id"]
+		if id == "" {
+			http.Error(w,errors.New("id is required").Error(),http.StatusBadRequest)
+			return 
+		}
+
+		request_id,err := strconv.Atoi(id)
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusBadRequest)
+			return
+		} 
+		
+		response := participantService.GetAllParticipants(ctx , request_id)
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK) 
+		err = json.NewEncoder(w).Encode(response)
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusInternalServerError)
+		}
+
+	}
+}
