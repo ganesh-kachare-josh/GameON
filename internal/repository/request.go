@@ -10,6 +10,7 @@ const getRequestByIdQuery = "SELECT requests.id, requests.user_id, requests.spor
 
 const GetAllRequestsQuery = "SELECT requests.id, requests.user_id, requests.sport, address.name, address.street,address.city, address.state, address.country,  requests.time,  requests.court_price, requests.status FROM requests JOIN address ON requests.address_id = address.id;"
 
+const GetAllParticipantsQuery = "SELECT id , user_id , status FROM participants WHERE request_id = $1"
 
 type repoPerson struct {
 	DB *sql.DB
@@ -18,6 +19,7 @@ type repoPerson struct {
 type RepoPerson interface {
      GetRequestById(ctx context.Context , request_id int ) (Request , error) 
 	 GetAllRequests(ctx context.Context) ([]Request , error) 
+	 GetAllParticipants(ctx context.Context , request_id int) ([]ParticipantData)
 }
 
 func NewRepo(db *sql.DB) (RepoPerson) {
@@ -50,4 +52,16 @@ func (rp repoPerson) GetAllRequests(ctx context.Context) ([]Request , error) {
 	}
     
 	return requests , nil 
+}
+
+func (rp repoPerson) GetAllParticipants (ctx context.Context , request_id int) ([]ParticipantData) {
+	db := sqlx.NewDb(rp.DB, "postgres")
+
+	var participants []ParticipantData 
+
+	err := db.Select(&participants , GetAllParticipantsQuery , request_id)
+	if err != nil {
+		return []ParticipantData{}
+	}
+	return participants
 }
