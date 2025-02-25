@@ -14,6 +14,7 @@ func NewRouter(deps Dependencies) *mux.Router {
 	// Routes.
 	router.HandleFunc("/request/{id}" , request.GetRequestById(deps.RequestService)).Methods(http.MethodGet)
 	router.HandleFunc("/requests" , request.GetAllRequests(deps.RequestService)).Methods(http.MethodGet)
+	router.HandleFunc("/request/{id}/participants" , request.GetAllParticipants(deps.RequestService)).Methods(http.MethodGet)
 
 	// Authentication. 
 	router.HandleFunc("/login" , auth.Login(deps.AuthService)).Methods(http.MethodPost) 
