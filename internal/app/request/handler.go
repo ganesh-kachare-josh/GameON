@@ -1,9 +1,9 @@
-package request 
+package request
 
 import (
 	"encoding/json"
 	"errors"
-	"net/http" 
+	"net/http"
 	"strconv"
 	"github.com/gorilla/mux"
 )
@@ -84,5 +84,42 @@ func GetAllParticipants(participantService Service) (func (w http.ResponseWriter
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 		}
 
+	}
+}
+
+func AcceptRequest(acceptRequestService Service) (func (w http.ResponseWriter , r * http.Request)) {
+	return func (w http.ResponseWriter , r *http.Request) {
+		ctx := r.Context()
+
+		vars := mux.Vars(r)
+		id := vars["request_id"]
+		if id == "" {
+			http.Error(w,errors.New("id is required").Error(),http.StatusBadRequest)
+			return 
+		}
+
+		request_id,err := strconv.Atoi(id)
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusBadRequest)
+			return
+		}
+
+		var body AcceptRequestBody 
+		err = json.NewDecoder(r.Body).Decode(&body)
+		if err != nil {
+			http.Error(w , errors.New("failed to decode request body").Error(),http.StatusInternalServerError) 
+			return 
+		}
+
+		body.Request_id = request_id 
+
+		response := acceptRequestService.AcceptRequest(ctx , body ) 
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK) 
+		err = json.NewEncoder(w).Encode(response)
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusInternalServerError)
+		}
 	}
 }
