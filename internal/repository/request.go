@@ -12,6 +12,8 @@ const GetAllRequestsQuery = "SELECT requests.id, requests.user_id, requests.spor
 
 const GetAllParticipantsQuery = "SELECT id , user_id , status FROM participants WHERE request_id = $1"
 
+const AcceptRequestQuery = "INSERT INTO participants (request_id , user_id , status) VALUES($1 ,$2 ,$3) RETURNING *"
+
 type repoPerson struct {
 	DB *sql.DB
 }
@@ -20,6 +22,7 @@ type RepoPerson interface {
      GetRequestById(ctx context.Context , request_id int ) (Request , error) 
 	 GetAllRequests(ctx context.Context) ([]Request , error) 
 	 GetAllParticipants(ctx context.Context , request_id int) ([]ParticipantData)
+	 AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
 }
 
 func NewRepo(db *sql.DB) (RepoPerson) {
@@ -64,4 +67,16 @@ func (rp repoPerson) GetAllParticipants (ctx context.Context , request_id int) (
 		return []ParticipantData{}
 	}
 	return participants
+}
+
+func (rp repoPerson) AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData) {
+	db := sqlx.NewDb(rp.DB, "postgres") 
+
+	var data AcceptRequestData 
+
+	err := db.Get(&data , AcceptRequestQuery , requestBody.Request_id, requestBody.User_id , "Pending")
+	if err != nil {
+		return AcceptRequestData{}
+	}
+	return data
 }

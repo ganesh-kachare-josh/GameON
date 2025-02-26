@@ -44,3 +44,15 @@ type ParticipantData struct {
 }
 
 var Participants []ParticipantData
+
+type AcceptRequestData struct {
+	Id         int    `db:"id"`
+	Request_id int    `db:"request_id"`
+	User_id    int    `db:"user_id"`
+	Status     string `db:"status"`
+}
+
+type AcceptRequestBody struct {
+	Request_id int
+	User_id    int
+}
