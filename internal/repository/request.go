@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/jmoiron/sqlx"
+	"fmt"
 )
 
 const getRequestByIdQuery = "SELECT requests.id, requests.user_id, requests.sport, address.name, address.street,address.city, address.state, address.country,  requests.time,  requests.court_price, requests.status FROM requests JOIN address ON requests.address_id = address.id WHERE requests.id = $1;"
@@ -16,6 +17,8 @@ const AcceptRequestQuery = "INSERT INTO participants (request_id , user_id , sta
 
 const ConfirmRequestQuery = "UPDATE participants SET status = REPLACE(status , 'Pending' , 'Confirmed') WHERE request_id = $1 AND user_id = $2 RETURNING *"
 
+const DeleteRequestQuery = "DELETE FROM requests WHERE id = $1"
+
 type repoPerson struct {
 	DB *sql.DB
 }
@@ -26,6 +29,7 @@ type RepoPerson interface {
 	 GetAllParticipants(ctx context.Context , request_id int) ([]ParticipantData)
 	 AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
 	 ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
+	 DeleteRequest(ctx context.Context , request_id int) (sql.Result , error)
 }
 
 func NewRepo(db *sql.DB) (RepoPerson) {
@@ -94,4 +98,15 @@ func (rp repoPerson) ConfirmRequest(ctx context.Context , requestBody AcceptRequ
 		return AcceptRequestData{}
 	}
 	return data
+}
+
+func (rp  repoPerson) DeleteRequest(ctx context.Context , request_id int) (sql.Result , error) {
+	db := sqlx.NewDb(rp.DB, "postgres")
+	
+	result , err := db.Exec(DeleteRequestQuery , request_id) 
+	if err != nil {
+		return result , fmt.Errorf("failed to delete item: %v", err)	
+	}
+    
+	return result , nil 
 }
