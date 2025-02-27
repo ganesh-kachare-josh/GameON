@@ -16,10 +16,11 @@ func NewRouter(deps Dependencies) *mux.Router {
 	router.HandleFunc("/requests" , request.GetAllRequests(deps.RequestService)).Methods(http.MethodGet)
 	router.HandleFunc("/request/{id}/participants" , request.GetAllParticipants(deps.RequestService)).Methods(http.MethodGet)
 	router.HandleFunc("/request/{request_id}/accept" , request.AcceptRequest(deps.RequestService)).Methods(http.MethodPost)
+	router.HandleFunc("/request/{request_id}/confirm" , request.ConfirmRequest(deps.RequestService)).Methods(http.MethodPost)
 
 	// Authentication. 
 	router.HandleFunc("/login" , auth.Login(deps.AuthService)).Methods(http.MethodPost) 
 	router.HandleFunc("/register" , auth.Register(deps.AuthService)).Methods(http.MethodPost) 
 	return router
 
-} 
+}
