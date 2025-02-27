@@ -18,6 +18,11 @@ func NewRouter(deps Dependencies) *mux.Router {
 	router.HandleFunc("/request/{request_id}/accept" , request.AcceptRequest(deps.RequestService)).Methods(http.MethodPost)
 	router.HandleFunc("/request/{request_id}/confirm" , request.ConfirmRequest(deps.RequestService)).Methods(http.MethodPost)
 	router.HandleFunc("/request/{request_id}" , request.DeleteRequest(deps.RequestService)).Methods(http.MethodDelete)
+	router.HandleFunc("/participants/{pid}" , request.RejectParticipant(deps.RequestService)).Methods(http.MethodDelete)
+
+
+
+
 
 	// Authentication. 
 	router.HandleFunc("/login" , auth.Login(deps.AuthService)).Methods(http.MethodPost) 
