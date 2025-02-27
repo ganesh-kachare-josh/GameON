@@ -56,3 +56,11 @@ type AcceptRequestBody struct {
 	Request_id int
 	User_id    int
 }
+
+type UserData struct {
+	Id           int             `db:"id"`
+	Name         string          `db:"name"`
+	Email        string          `db:"email"`
+	Sports       json.RawMessage `db:"sports"`
+	Phone_Number string          `db:"phone_number"`
+}
