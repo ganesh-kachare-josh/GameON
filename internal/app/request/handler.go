@@ -2,9 +2,10 @@ package request
 
 import (
 	"encoding/json"
-	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
+
 	"github.com/gorilla/mux"
 )
 
@@ -15,7 +16,7 @@ func GetRequestById(requestService Service)(func (w http.ResponseWriter , r *htt
 		vars := mux.Vars(r)
 		id := vars["id"]
 		if id == "" {
-			http.Error(w,errors.New("id is required").Error(),http.StatusBadRequest)
+			http.Error(w,"id is required",http.StatusBadRequest)
 			return 
 		}
 		request_id,err := strconv.Atoi(id)
@@ -65,7 +66,7 @@ func GetAllParticipants(participantService Service) (func (w http.ResponseWriter
 		vars := mux.Vars(r)
 		id := vars["id"]
 		if id == "" {
-			http.Error(w,errors.New("id is required").Error(),http.StatusBadRequest)
+			http.Error(w,"id is required",http.StatusBadRequest)
 			return 
 		}
 
@@ -94,7 +95,7 @@ func AcceptRequest(acceptRequestService Service) (func (w http.ResponseWriter , 
 		vars := mux.Vars(r)
 		id := vars["request_id"]
 		if id == "" {
-			http.Error(w,errors.New("id is required").Error(),http.StatusBadRequest)
+			http.Error(w,"id is required",http.StatusBadRequest)
 			return 
 		}
 
@@ -107,7 +108,7 @@ func AcceptRequest(acceptRequestService Service) (func (w http.ResponseWriter , 
 		var body AcceptRequestBody 
 		err = json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
-			http.Error(w , errors.New("failed to decode request body").Error(),http.StatusInternalServerError) 
+			http.Error(w ,"failed to decode request body",http.StatusInternalServerError) 
 			return 
 		}
 
@@ -131,7 +132,7 @@ func ConfirmRequest(confirmRequestService Service) (func (w http.ResponseWriter 
 		vars := mux.Vars(r)
 		id := vars["request_id"]
 		if id == "" {
-			http.Error(w,errors.New("id is required").Error(),http.StatusBadRequest)
+			http.Error(w,"id is required",http.StatusBadRequest)
 			return 
 		}
 
@@ -144,7 +145,7 @@ func ConfirmRequest(confirmRequestService Service) (func (w http.ResponseWriter 
 		var body AcceptRequestBody 
 		err = json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
-			http.Error(w , errors.New("failed to decode request body").Error(),http.StatusInternalServerError) 
+			http.Error(w ,"failed to decode request body",http.StatusInternalServerError) 
 			return 
 		}
 
@@ -158,5 +159,49 @@ func ConfirmRequest(confirmRequestService Service) (func (w http.ResponseWriter 
 		if err != nil {
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 		}
+	}
+}
+
+func DeleteRequest(deleteRequest Service) (func (w http.ResponseWriter , r *http.Request)) {
+	return func(w http.ResponseWriter , r * http.Request) {
+		ctx := r.Context() 
+
+		vars := mux.Vars(r)
+		id := vars["request_id"]
+		if id == "" {
+			http.Error(w,"id is required",http.StatusBadRequest)
+			return 
+		}
+
+		request_id,err := strconv.Atoi(id)
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusBadRequest)
+			return
+		}
+
+		result , err := deleteRequest.DeleteRequest(ctx , request_id)
+		if err != nil {
+			http.Error(w,fmt.Sprintf("failed to delete request: %v", err),http.StatusInternalServerError)
+			return
+		}
+
+		rowsAffected, err := result.RowsAffected()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("error checking rows affected: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		if rowsAffected == 0 {
+			http.Error(w, "Request not found", http.StatusNotFound)
+			return
+		}
+		msg := DeleteResponse{
+			Message:  "Play request deleted successfully",
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(msg)
+
 	}
 }
