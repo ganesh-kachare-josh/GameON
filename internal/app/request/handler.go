@@ -205,3 +205,36 @@ func DeleteRequest(deleteRequest Service) (func (w http.ResponseWriter , r *http
 
 	}
 }
+
+func RejectParticipant(rejectRequest Service) (func (w http.ResponseWriter , r *http.Request)) {
+	return func(w http.ResponseWriter , r * http.Request) {
+		ctx := r.Context() 
+
+		vars := mux.Vars(r)
+		id := vars["pid"]
+		if id == "" {
+			http.Error(w,"id is required",http.StatusBadRequest)
+			return 
+		}
+		participant_id,err := strconv.Atoi(id)
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusBadRequest)
+			return
+		} 
+
+		err = rejectRequest.RejectParticipant(ctx , participant_id)
+		if err != nil {
+			http.Error(w,fmt.Sprintf("failed to delete request: %v", err),http.StatusInternalServerError)
+			return
+		}
+
+		
+		msg := DeleteResponse{
+			Message:  "Participant has been rejected from the request.",
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(msg)
+	}
+}
