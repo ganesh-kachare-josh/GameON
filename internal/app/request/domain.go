@@ -30,3 +30,7 @@ type AcceptRequestBody struct {
 	Request_id int `json:"request_id"`
 	User_id    int `json:"user_id"`
 }
+
+type DeleteResponse struct {
+	Message string `json:"message"`
+}

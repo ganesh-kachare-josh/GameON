@@ -1,8 +1,10 @@
 package request
 
 import (
-	"context" 
-	"github.com/ganesh-kachare-josh/GameON/internal/repository" 
+	"context"
+	"database/sql"
+
+	"github.com/ganesh-kachare-josh/GameON/internal/repository"
 ) 
 
 type service struct {
@@ -15,6 +17,7 @@ type Service interface {
 	GetAllParticipants(ctx context.Context , request_id int)([]repository.ParticipantData)
 	AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
 	ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
+	DeleteRequest(ctx context.Context , request_id int) (sql.Result , error)
 }
 
 func (s *service ) GetRequestById(ctx context.Context , request_id int) (Request , error) {
@@ -46,6 +49,10 @@ func (s *service) AcceptRequest(ctx context.Context , requestBody AcceptRequestB
 func (s *service) ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData) {
 	response := s.requestRepo.ConfirmRequest(ctx , repository.AcceptRequestBody(requestBody))
 	return AcceptRequestData(response)
+}
+
+func (s *service) DeleteRequest(ctx context.Context , request_id int) (sql.Result , error) {
+	return s.requestRepo.DeleteRequest(ctx , request_id)
 }
 
 func NewService(requestRepo repository.RepoPerson) (Service) {
