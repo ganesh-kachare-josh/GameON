@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/ganesh-kachare-josh/GameON/internal/app/auth"
+	"github.com/ganesh-kachare-josh/GameON/internal/app/profile"
 	"github.com/ganesh-kachare-josh/GameON/internal/app/request"
 	"github.com/gorilla/mux"
 )
@@ -11,7 +12,7 @@ import (
 func NewRouter(deps Dependencies) *mux.Router {
 	router := mux.NewRouter()
 	
-	// Routes.
+	// Request Routes
 	router.HandleFunc("/request/{id}" , request.GetRequestById(deps.RequestService)).Methods(http.MethodGet)
 	router.HandleFunc("/requests" , request.GetAllRequests(deps.RequestService)).Methods(http.MethodGet)
 	router.HandleFunc("/request/{id}/participants" , request.GetAllParticipants(deps.RequestService)).Methods(http.MethodGet)
@@ -21,10 +22,12 @@ func NewRouter(deps Dependencies) *mux.Router {
 	router.HandleFunc("/participants/{pid}" , request.RejectParticipant(deps.RequestService)).Methods(http.MethodDelete)
 
 
+	// Profile Routes 
+	router.HandleFunc("/user/{user_id}" , profile.GetUserById(deps.ProfileService)).Methods(http.MethodGet) 
 
 
 
-	// Authentication. 
+	// Authentication Routes. 
 	router.HandleFunc("/login" , auth.Login(deps.AuthService)).Methods(http.MethodPost) 
 	router.HandleFunc("/register" , auth.Register(deps.AuthService)).Methods(http.MethodPost) 
 	return router
