@@ -19,6 +19,8 @@ const ConfirmRequestQuery = "UPDATE participants SET status = REPLACE(status , '
 
 const DeleteRequestQuery = "DELETE FROM requests WHERE id = $1"
 
+const RejectParticipantQuery = "DELETE FROM participants WHERE id = $1"
+
 type repoPerson struct {
 	DB *sql.DB
 }
@@ -30,6 +32,7 @@ type RepoPerson interface {
 	 AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
 	 ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
 	 DeleteRequest(ctx context.Context , request_id int) (sql.Result , error)
+	 RejectParticipant(ctx context.Context , participant_id int) (error)
 }
 
 func NewRepo(db *sql.DB) (RepoPerson) {
@@ -109,4 +112,14 @@ func (rp  repoPerson) DeleteRequest(ctx context.Context , request_id int) (sql.R
 	}
     
 	return result , nil 
+}
+
+func (rp repoPerson) RejectParticipant(ctx context.Context , participant_id int) (error) {
+	db := sqlx.NewDb(rp.DB, "postgres")
+	
+	_, err := db.Exec(RejectParticipantQuery , participant_id)  
+	if err != nil {
+		return fmt.Errorf("failed to delete item: %v", err)	
+	}
+	return nil 
 }
