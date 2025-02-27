@@ -14,6 +14,7 @@ type Service interface {
 	GetAllRequests(ctx context.Context) ([]repository.Request , error)
 	GetAllParticipants(ctx context.Context , request_id int)([]repository.ParticipantData)
 	AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
+	ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
 }
 
 func (s *service ) GetRequestById(ctx context.Context , request_id int) (Request , error) {
@@ -42,8 +43,13 @@ func (s *service) AcceptRequest(ctx context.Context , requestBody AcceptRequestB
 	return AcceptRequestData(response)
 }
 
+func (s *service) ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData) {
+	response := s.requestRepo.ConfirmRequest(ctx , repository.AcceptRequestBody(requestBody))
+	return AcceptRequestData(response)
+}
+
 func NewService(requestRepo repository.RepoPerson) (Service) {
       return &service{
-		requestRepo: requestRepo,
+		requestRepo: requestRepo,	
 	  }
-} 
+}
