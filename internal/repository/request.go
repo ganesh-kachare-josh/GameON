@@ -21,6 +21,8 @@ const DeleteRequestQuery = "DELETE FROM requests WHERE id = $1"
 
 const RejectParticipantQuery = "DELETE FROM participants WHERE id = $1"
 
+const CreateRequestQuery = "INSERT INTO requests (user_id , sport , location , time , court_price , status , created_at) VALUES($1,$2,$3,$4,$5,'Open',NOW()) RETURNING id , user_id , sport , location , time , court_price , status"
+
 type repoPerson struct {
 	DB *sql.DB
 }
@@ -33,6 +35,7 @@ type RepoPerson interface {
 	 ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
 	 DeleteRequest(ctx context.Context , request_id int) (sql.Result , error)
 	 RejectParticipant(ctx context.Context , participant_id int) (error)
+	 CreateRequest(ctx context.Context , requestBody Request) (Request , error)
 }
 
 func NewRepo(db *sql.DB) (RepoPerson) {
@@ -122,4 +125,15 @@ func (rp repoPerson) RejectParticipant(ctx context.Context , participant_id int)
 		return fmt.Errorf("failed to delete item: %v", err)	
 	}
 	return nil 
+}
+
+func (rp repoPerson) CreateRequest(ctx context.Context , requestBody Request) (Request , error) {
+	db := sqlx.NewDb(rp.DB , "postgres") 
+
+	var responseBody Request 
+	err := db.Get(&responseBody , CreateRequestQuery , requestBody.User_id , requestBody.Sport , requestBody.Location , requestBody.Time , requestBody.CourtPrice)
+	if err != nil {
+		return Request{} , err 
+	}
+	return responseBody , nil 
 }

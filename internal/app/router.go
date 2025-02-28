@@ -20,6 +20,7 @@ func NewRouter(deps Dependencies) *mux.Router {
 	router.HandleFunc("/request/{request_id}/confirm" , request.ConfirmRequest(deps.RequestService)).Methods(http.MethodPost)
 	router.HandleFunc("/request/{request_id}" , request.DeleteRequest(deps.RequestService)).Methods(http.MethodDelete)
 	router.HandleFunc("/participants/{pid}" , request.RejectParticipant(deps.RequestService)).Methods(http.MethodDelete)
+	router.HandleFunc("/request" , request.CreateRequest(deps.RequestService)).Methods(http.MethodPost)
 
 
 	// Profile Routes 

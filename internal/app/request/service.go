@@ -19,6 +19,7 @@ type Service interface {
 	ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
 	DeleteRequest(ctx context.Context , request_id int) (sql.Result , error)
 	RejectParticipant(ctx context.Context , participant_id int) (error)
+	CreateRequest(ctx context.Context , requestBody Request) (repository.Request , error) 
 }
 
 func (s *service ) GetRequestById(ctx context.Context , request_id int) (Request , error) {
@@ -58,6 +59,10 @@ func (s *service) DeleteRequest(ctx context.Context , request_id int) (sql.Resul
 
 func (s *service) RejectParticipant(ctx context.Context , participant_id int) (error) {
 	return s.requestRepo.RejectParticipant(ctx , participant_id)
+}
+
+func (s *service) CreateRequest(ctx context.Context , requestBody Request) (repository.Request , error) {
+	return s.requestRepo.CreateRequest(ctx , repository.Request(requestBody))
 }
 
 func NewService(requestRepo repository.RepoPerson) (Service) {

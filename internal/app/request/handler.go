@@ -238,3 +238,31 @@ func RejectParticipant(rejectRequest Service) (func (w http.ResponseWriter , r *
 		json.NewEncoder(w).Encode(msg)
 	}
 }
+
+func CreateRequest(createRequest Service) func (w http.ResponseWriter , r *http.Request) {
+	return func (w http.ResponseWriter , r *http.Request) {
+		ctx := r.Context()
+
+		var requestBody Request 
+
+		err := json.NewDecoder(r.Body).Decode(&requestBody)
+		if err != nil {
+			http.Error(w , fmt.Sprintf("failed to decode the request body: %v" , err) , http.StatusInternalServerError)
+			return
+		}
+
+		response , err := createRequest.CreateRequest(ctx , requestBody)
+		if err != nil {
+			http.Error(w , fmt.Sprintf("failed to create request: %v" ,err ) , http.StatusInternalServerError)
+			return
+		}
+		
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusCreated)
+		err = json.NewEncoder(w).Encode(response)
+		if err != nil {	
+			http.Error(w,err.Error(),http.StatusInternalServerError)
+		}
+
+	}
+}
