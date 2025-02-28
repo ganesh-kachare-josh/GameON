@@ -7,9 +7,9 @@ import (
 	"fmt"
 )
 
-const getRequestByIdQuery = "SELECT requests.id, requests.user_id, requests.sport, address.name, address.street,address.city, address.state, address.country,  requests.time,  requests.court_price, requests.status FROM requests JOIN address ON requests.address_id = address.id WHERE requests.id = $1;"
+const getRequestByIdQuery = "SELECT id , user_id , sport , location , time , court_price , status FROM requests WHERE id = $1"
 
-const GetAllRequestsQuery = "SELECT requests.id, requests.user_id, requests.sport, address.name, address.street,address.city, address.state, address.country,  requests.time,  requests.court_price, requests.status FROM requests JOIN address ON requests.address_id = address.id;"
+const GetAllRequestsQuery = "SELECT id , user_id , sport , location , time , court_price , status FROM requests"
 
 const GetAllParticipantsQuery = "SELECT id , user_id , status FROM participants WHERE request_id = $1"
 
