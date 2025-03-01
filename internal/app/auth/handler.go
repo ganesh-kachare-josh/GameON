@@ -27,7 +27,7 @@ func Login(authService Service) func(w http.ResponseWriter, r *http.Request) {
 		}
 
 		cookie := http.Cookie{
-			Name:     "auth_token",
+			Name:     "token",
 			Value:    response.Token,
 			Expires:  time.Now().Add(24 * time.Hour),
 			HttpOnly: true,
