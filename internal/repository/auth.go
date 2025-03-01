@@ -17,8 +17,9 @@ type repoAuth struct {
 }
 
 type RepoAuth interface {
-	Login(ctx context.Context, requestBody Login) (Login, error)
+	Login(ctx context.Context, requestBody Login) (LoginResponse, error)
 	Register(ctx context.Context, requestBody Register) (Register, error)
+	Logout(ctx context.Context)(LogoutResponse)
 }
 
 func NewAuthRepo(db *sql.DB) RepoAuth {
@@ -27,24 +28,35 @@ func NewAuthRepo(db *sql.DB) RepoAuth {
 	}
 }
 
-func (ra repoAuth) Login(ctx context.Context, requestBody Login) (Login, error) {
+func (ra repoAuth) Login(ctx context.Context, requestBody Login) (LoginResponse, error) {
 	db := sqlx.NewDb(ra.DB, "postgres")
+
 	var login Login
 	originalPassword := requestBody.Password
 
+	var response LoginResponse
+
 	err := db.Get(&login, "SELECT id , email , password FROM users WHERE email = $1", requestBody.Email)
 	if err != nil {
-		return Login{}, errors.New("incorrect email")
+		return LoginResponse{}, errors.New("incorrect email")
 	}
 
 	islogin := pkg.VerifyPassword(requestBody.Password, login.Password)
-
 	if !islogin {
-		return Login{}, errors.New("incorrect password")
+		return LoginResponse{}, errors.New("incorrect password")
+	}
+
+	// Generating JWT Token.
+	tokenString, err := pkg.GenerateToken(login.Id)
+	if err != nil {
+		return LoginResponse{}, err
 	}
 
 	login.Password = originalPassword
-	return login, nil
+	response.LoginData = login
+	response.Token = tokenString
+
+	return response, nil
 }
 
 func (ra repoAuth) Register(ctx context.Context, requestBody Register) (Register, error) {
@@ -77,7 +89,10 @@ func (ra repoAuth) Register(ctx context.Context, requestBody Register) (Register
 
 		return Register{}, err
 	}
-
 	register.Password = originalPassword // Reassigning original password to requestBody.
 	return register, nil
+}
+
+func (ra repoAuth) Logout(ctx context.Context)(LogoutResponse) {
+	return LogoutResponse{Message: "User Logged Out."}
 }

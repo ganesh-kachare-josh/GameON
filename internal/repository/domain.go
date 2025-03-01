@@ -60,3 +60,12 @@ type UserData struct {
 	Sports       json.RawMessage `db:"sports"`
 	Phone_Number string          `db:"phone_number"`
 }
+
+type LoginResponse struct {
+	LoginData Login
+	Token     string
+}
+
+type LogoutResponse struct {
+	Message string
+}

@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"time"
 )
 
 func Login(authService Service) func(w http.ResponseWriter, r *http.Request) {
@@ -19,14 +20,26 @@ func Login(authService Service) func(w http.ResponseWriter, r *http.Request) {
 
 		ctx := context.Background()
 
-		login, err = authService.Login(ctx, login)
+		response, err := authService.Login(ctx, login)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
 
+		cookie := http.Cookie{
+			Name:     "auth_token",
+			Value:    response.Token,
+			Expires:  time.Now().Add(24 * time.Hour),
+			HttpOnly: true,
+			Secure:   false,
+			Path:     "/",
+			SameSite: http.SameSiteLaxMode,
+		}
+
+		http.SetCookie(w, &cookie)
+
 		w.WriteHeader(http.StatusOK)
-		err = json.NewEncoder(w).Encode(login)
+		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
@@ -55,6 +68,33 @@ func Register(authService Service) func(w http.ResponseWriter, r *http.Request) 
 		w.WriteHeader(http.StatusCreated)
 
 		err = json.NewEncoder(w).Encode(register)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+
+	}
+}
+
+func Logout(authService Service) func(w http.ResponseWriter , r *http.Request) {
+	return func(w http.ResponseWriter , r *http.Request) {
+
+		ctx := r.Context()
+		response := authService.Logout(ctx) 
+
+		cookie := http.Cookie{
+			Name:     "auth_token",
+			Value:    "",
+			HttpOnly: true,
+			Secure:   false,
+			Path:     "/",
+			SameSite: http.SameSiteLaxMode,
+			MaxAge: -1,
+		}
+
+		http.SetCookie(w, &cookie)
+
+		w.WriteHeader(http.StatusOK)
+		err := json.NewEncoder(w).Encode(response)
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
