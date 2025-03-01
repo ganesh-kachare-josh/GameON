@@ -7,12 +7,13 @@ import (
 	"time"
 
 	"github.com/ganesh-kachare-josh/GameON/internal/pkg"
+	"github.com/ganesh-kachare-josh/GameON/internal/repository"
 )
 
 func Login(authService Service) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
 
-		var login LoginData
+		var login repository.Login
 
 		err := json.NewDecoder(r.Body).Decode(&login)
 		if err != nil {

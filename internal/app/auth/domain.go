@@ -4,12 +4,6 @@ import (
 	"encoding/json"
 )
 
-type LoginData struct {
-	Id       int    `json:"id"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
-}
-
 type RegisterData struct {
 	Id           int             `json:"id"`
 	Name         string          `json:"name"`

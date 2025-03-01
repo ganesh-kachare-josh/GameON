@@ -19,6 +19,7 @@ var Requests []Request
 
 type Login struct {
 	Id       int    `db:"id"`
+	Name     string `db:"name"`
 	Email    string `db:"email"`
 	Password string `db:"password"`
 }
@@ -62,8 +63,10 @@ type UserData struct {
 }
 
 type LoginResponse struct {
-	LoginData Login
-	Token     string
+	Id    int
+	Email string
+	Name  string
+	Token string
 }
 
 type LogoutResponse struct {

@@ -32,11 +32,11 @@ func (ra repoAuth) Login(ctx context.Context, requestBody Login) (LoginResponse,
 	db := sqlx.NewDb(ra.DB, "postgres")
 
 	var login Login
-	originalPassword := requestBody.Password
+	// originalPassword := requestBody.Password
 
 	var response LoginResponse
 
-	err := db.Get(&login, "SELECT id , email , password FROM users WHERE email = $1", requestBody.Email)
+	err := db.Get(&login, "SELECT id , email , name , password FROM users WHERE email = $1", requestBody.Email)
 	if err != nil {
 		return LoginResponse{}, errors.New("incorrect email")
 	}
@@ -52,8 +52,9 @@ func (ra repoAuth) Login(ctx context.Context, requestBody Login) (LoginResponse,
 		return LoginResponse{}, err
 	}
 
-	login.Password = originalPassword
-	response.LoginData = login
+	response.Id = login.Id 
+	response.Email=login.Email
+	response.Name=login.Name
 	response.Token = tokenString
 
 	return response, nil
