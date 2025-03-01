@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"time"
+
+	"github.com/ganesh-kachare-josh/GameON/internal/pkg"
 )
 
 func Login(authService Service) func(w http.ResponseWriter, r *http.Request) {
@@ -99,5 +101,48 @@ func Logout(authService Service) func(w http.ResponseWriter , r *http.Request) {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
+	}
+}
+
+func IsLogin(authService Service) func (w http.ResponseWriter , r *http.Request) {
+	return func (w http.ResponseWriter , r *http.Request) {
+
+		var loginstatus LoginStatus 
+
+		cookie, err := r.Cookie("token")
+		if err != nil || cookie == nil {
+		// No token cookie found, set user_id = 0 and isLogin = false
+			loginstatus.User_id = 0
+			loginstatus.Islogin = false
+			// Return the thing.
+
+			err := json.NewEncoder(w).Encode(loginstatus)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			return
+		}
+
+		tokenString := cookie.Value 
+
+		user_id , err := pkg.GetUserIdFromToken(tokenString) 
+
+		if err != nil {
+			loginstatus.User_id = 0
+			loginstatus.Islogin = false 
+			err := json.NewEncoder(w).Encode(loginstatus)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			return
+		}
+
+		loginstatus.User_id = user_id
+		loginstatus.Islogin = true 
+		err = json.NewEncoder(w).Encode(loginstatus)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+		}
+		
 	}
 }

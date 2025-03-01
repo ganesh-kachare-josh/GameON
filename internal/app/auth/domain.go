@@ -19,3 +19,8 @@ type RegisterData struct {
 	Sport        json.RawMessage `json:"sports"`
 	Created_at   string          `json:"created_at"`
 }
+
+type LoginStatus struct {
+	User_id int
+	Islogin bool
+}
