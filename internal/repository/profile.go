@@ -14,6 +14,7 @@ type profileRepo struct {
 
 type ProfileRepo interface {
 	GetUserById(ctx context.Context , user_id int) (UserData , error)
+	UpdateProfile(ctx context.Context ,requestBody UserData) (UserData , error) 
 }
 
 func NewProfileRepo(db *sql.DB) ProfileRepo {
@@ -32,4 +33,16 @@ func (rp profileRepo) GetUserById(ctx context.Context , user_id int) (UserData ,
 		return UserData{} , fmt.Errorf("user Does Not Exist") 
 	}
 	return user , nil 
-} 
+}
+
+func (rp profileRepo) UpdateProfile(ctx context.Context ,requestBody UserData) (UserData , error) {
+	db := sqlx.NewDb(rp.DB , "postgres") 
+	
+	var user UserData 
+
+	err := db.Get(&user , pkg.UpdateUserByIdQuery, requestBody.Id , requestBody.Name , requestBody.Email , requestBody.Sports , requestBody.Phone_Number) 
+	if err != nil {
+		return UserData{} , err
+	}
+	return user , nil 
+}

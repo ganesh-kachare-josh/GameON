@@ -27,6 +27,7 @@ func NewRouter(deps Dependencies) *mux.Router {
 
 	// Profile Routes
 	router.HandleFunc("/user/{user_id}",middleware.AuthenticationMiddleware(profile.GetUserById(deps.ProfileService))).Methods(http.MethodGet)
+	router.HandleFunc("/profile/update" , middleware.AuthenticationMiddleware(profile.UpdateProfile(deps.ProfileService))).Methods(http.MethodPost)
 
 	
 	// Authentication Routes.

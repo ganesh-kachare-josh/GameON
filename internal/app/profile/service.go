@@ -12,6 +12,7 @@ type service struct {
 
 type Service interface {
 	GetUserById(ctx context.Context, user_id int) (UserData, error)
+	UpdateProfile(ctx context.Context , requestBody UserData)(UserData , error)
 }
 
 func (s *service) GetUserById(ctx context.Context, user_id int) (UserData, error) {
@@ -20,6 +21,14 @@ func (s *service) GetUserById(ctx context.Context, user_id int) (UserData, error
 		return UserData{}, err
 	}
 	return UserData(response), nil
+}
+
+func (s *service) UpdateProfile(ctx context.Context , requestBody UserData)(UserData , error) {
+	response , err :=  s.profileRepo.UpdateProfile(ctx , repository.UserData(requestBody))
+	if err != nil {
+		return UserData{} , err 
+	}
+	return UserData(response) , nil 
 }
 
 func NewService(profileRepo repository.ProfileRepo) Service {

@@ -30,6 +30,8 @@ const GetSportByRequestId = "SELECT sport from requests WHERE id = $1"
 // Profile Queries 
 const GetUserByIdQuery = "SELECT id , name , email , sports , phone_number FROM users WHERE id = $1" 
 
+const UpdateUserByIdQuery = "UPDATE users SET name = $2, email = $3, sports = $4, phone_number = $5 WHERE id = $1 RETURNING id, name, email, sports, phone_number"
+
 
 // Authentication Queries 
 const RegisterUserQuery = "INSERT INTO users (name , email , password , phone_number , sports , created_at) VALUES ($1 , $2 , $3 , $4 , $5 , NOW()) RETURNING id , name , email , password , phone_number , sports , created_at"
