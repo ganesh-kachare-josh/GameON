@@ -37,3 +37,8 @@ const UpdateUserByIdQuery = "UPDATE users SET name = $2, email = $3, sports = $4
 
 // Authentication Queries 
 const RegisterUserQuery = "INSERT INTO users (name , email , password , phone_number , sports , created_at) VALUES ($1 , $2 , $3 , $4 , $5 , NOW()) RETURNING id , name , email , password , phone_number , sports , created_at"
+
+// Rating Queries 
+const GiveRatingQuery = "INSERT into ratings(given_by , given_to , request_id , rating , feedback , created_at) VALUES ($1 , $2 , $3 , $4 , $5 , NOW())"
+
+const GetRatingByUserIdQuery = "SELECT r.id, r.given_by, u.name, r.given_to, r.request_id, req.sport, r.rating, r.feedback, r.created_at FROM ratings r JOIN requests req ON r.request_id = req.id JOIN users u ON r.given_by = u.id WHERE r.given_to = $1"

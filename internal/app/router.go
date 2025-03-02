@@ -5,6 +5,7 @@ import (
 
 	"github.com/ganesh-kachare-josh/GameON/internal/app/auth"
 	"github.com/ganesh-kachare-josh/GameON/internal/app/profile"
+	"github.com/ganesh-kachare-josh/GameON/internal/app/rating"
 	"github.com/ganesh-kachare-josh/GameON/internal/app/request"
 	"github.com/ganesh-kachare-josh/GameON/internal/pkg/middleware"
 	"github.com/gorilla/mux"
@@ -36,6 +37,10 @@ func NewRouter(deps Dependencies) *mux.Router {
 	router.HandleFunc("/login", auth.Login(deps.AuthService)).Methods(http.MethodPost)
 	router.HandleFunc("/register", auth.Register(deps.AuthService)).Methods(http.MethodPost)
 	router.HandleFunc("/islogin" ,auth.IsLogin(deps.AuthService)).Methods(http.MethodGet) 
+
+	// Rating Routes
+	router.HandleFunc("/ratings" , middleware.AuthenticationMiddleware(rating.GiveRating(deps.RatingService))).Methods(http.MethodPost) 
+	router.HandleFunc("/user/{user_id}/ratings" , middleware.AuthenticationMiddleware(rating.GetRatingByUserId(deps.RatingService))).Methods(http.MethodGet)
 	return router
 
 }

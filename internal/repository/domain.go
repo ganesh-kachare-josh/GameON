@@ -82,3 +82,27 @@ type ResponseForEmail struct {
 	Sport           string
 	Email           string
 }
+
+type RatingResponse struct {
+	Message string
+}
+
+type RatingRequestBody struct {
+	GivenBy    int    `db:"given_by"`
+	GivenTo    int    `db:"given_to"`
+	Request_id int    `db:"request_id"`
+	Rating     int    `db:"rating"`
+	Feedback   string `db:"feedback"`
+}
+
+type RatingUserIdResponse struct {
+	Id         int             `db:"id"`
+	Given_by   int             `db:"given_by"`
+	Name       string          `db:"name"`
+	Given_to   int             `db:"given_to"`
+	Request_id int             `db:"request_id"`
+	Sport      json.RawMessage `db:"sport"`
+	Rating     int             `db:"rating"`
+	Feedback   string          `db:"feedback"`
+	Created_at time.Time       `db:"created_at"`
+}
