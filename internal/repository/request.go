@@ -19,10 +19,10 @@ type RepoPerson interface {
      GetRequestById(ctx context.Context , request_id int ) (Request , error) 
 	 GetAllRequests(ctx context.Context) ([]Request , error) 
 	 GetAllParticipants(ctx context.Context , request_id int) ([]ParticipantData)
-	 AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error)
-	 ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error)
+	 AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , ResponseForEmail , error)
+	 ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , ResponseForEmail , error)
 	 DeleteRequest(ctx context.Context , request_id int) (sql.Result , error)
-	 RejectParticipant(ctx context.Context , participant_id int) (error)
+	 RejectParticipant(ctx context.Context , participant_id int) (ResponseForEmail , error)
 	 CreateRequest(ctx context.Context , requestBody Request) (Request , error)
 }
 
@@ -70,26 +70,26 @@ func (rp repoPerson) GetAllParticipants(ctx context.Context , request_id int) ([
 	return participants
 }
 
-func (rp repoPerson) AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error) {
+func (rp repoPerson) AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , ResponseForEmail , error) {
 	db := sqlx.NewDb(rp.DB, "postgres") 
 
 	var data AcceptRequestData 
 
 	err := db.Get(&data , pkg.AcceptRequestQuery , requestBody.Request_id, requestBody.User_id , "Pending")
 	if err != nil {
-		return AcceptRequestData{} , err
+		return AcceptRequestData{} , ResponseForEmail{} , err
 	}
 
 	var userId int 
 	err = db.Get(&userId , pkg.GetUserIdByRequestId , requestBody.Request_id)
 	if err != nil {
-		return AcceptRequestData{} , nil 
+		return AcceptRequestData{} , ResponseForEmail{} , nil 
 	} 
 
 	var email string 
 	err = db.Get(&email , pkg.GetEmailById , userId) 
 	if err != nil {
-		return AcceptRequestData{} , err 
+		return AcceptRequestData{} , ResponseForEmail{} , err 
 	}
 
 	var creatorName string 
@@ -98,22 +98,22 @@ func (rp repoPerson) AcceptRequest(ctx context.Context , requestBody AcceptReque
 
 	err = db.Get(&creatorName , pkg.GetNameByIdQuery , userId) 
 	if err != nil {
-		return AcceptRequestData{} , errors.New("user doesn't exist") 
+		return AcceptRequestData{} ,  ResponseForEmail{} , errors.New("user doesn't exist") 
 	}
 
 	err = db.Get(&ParticipantName , pkg.GetNameByIdQuery , requestBody.User_id) 
 	if err != nil {
-		return AcceptRequestData{} , errors.New("participant doesn't exist") 
+		return AcceptRequestData{} , ResponseForEmail{} ,  errors.New("participant doesn't exist") 
 	}
 
 	err = db.Get(&sport , pkg.GetSportByRequestId , requestBody.Request_id) 
 	if err != nil {
-		return AcceptRequestData{} , errors.New("participant doesn't exist") 
+		return AcceptRequestData{} , ResponseForEmail{} , errors.New("participant doesn't exist") 
 	}
 	var sportMap map[string]string 
 	err = json.Unmarshal(sport , &sportMap) 
 	if err != nil {
-		return AcceptRequestData{} , errors.New("error unmarshaling sport")
+		return AcceptRequestData{} , ResponseForEmail{} , errors.New("error unmarshaling sport")
 	}
 
 	var game string 
@@ -122,39 +122,36 @@ func (rp repoPerson) AcceptRequest(ctx context.Context , requestBody AcceptReque
 		break
 	}
 
+	var responseForEmail ResponseForEmail 
+	responseForEmail.CreatorName = creatorName 
+	responseForEmail.ParticipantName = ParticipantName 
+	responseForEmail.Sport = game 
+	responseForEmail.Email = email
 
-	err = pkg.SendEmail(email, 
-		fmt.Sprintf("🎉 Game On! %v Your Request Was Accepted!" , creatorName), 
-		fmt.Sprintf("Great news! %v has accepted your game request to play %v. Get ready to jump into action and enjoy the thrill! 🚀\n\nLog in now to check the details and start gaming!\n\nHappy Gaming! 🎮" , ParticipantName , game),
-	)
-	
-	if err != nil {
-		return AcceptRequestData{} , err 
-	}
-
-	return data , nil 
+	return data , responseForEmail , nil 
 }
 
-func (rp repoPerson) ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error) {
+
+func (rp repoPerson) ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData ,ResponseForEmail , error) {
 	db := sqlx.NewDb(rp.DB, "postgres") 
 
 	var data AcceptRequestData 
 
 	err := db.Get(&data , pkg.ConfirmRequestQuery , requestBody.Request_id , requestBody.User_id)
 	if err != nil {
-		return AcceptRequestData{} , err 
+		return AcceptRequestData{} ,ResponseForEmail{}, err 
 	}
 
 	var email string 
 	err = db.Get(&email , pkg.GetEmailById , requestBody.User_id) 
 	if err != nil {
-		return AcceptRequestData{} , err 
+		return AcceptRequestData{} ,ResponseForEmail{}, err 
 	} 
 
 	var userId int 
 	err = db.Get(&userId , pkg.GetUserIdByRequestId , requestBody.Request_id)
 	if err != nil {
-		return AcceptRequestData{} , nil 
+		return AcceptRequestData{} , ResponseForEmail{}, nil 
 	}
 
 	var creatorName string 
@@ -162,17 +159,17 @@ func (rp repoPerson) ConfirmRequest(ctx context.Context , requestBody AcceptRequ
 
 	err = db.Get(&creatorName , pkg.GetNameByIdQuery , userId) 
 	if err != nil {
-		return AcceptRequestData{} , errors.New("user doesn't exist") 
+		return AcceptRequestData{} , ResponseForEmail{} , errors.New("user doesn't exist") 
 	}
 
 	err = db.Get(&sport , pkg.GetSportByRequestId , requestBody.Request_id) 
 	if err != nil {
-		return AcceptRequestData{} , errors.New("participant doesn't exist") 
+		return AcceptRequestData{} , ResponseForEmail{} , errors.New("participant doesn't exist") 
 	}
 	var sportMap map[string]string 
 	err = json.Unmarshal(sport , &sportMap) 
 	if err != nil {
-		return AcceptRequestData{} , errors.New("error unmarshaling sport")
+		return AcceptRequestData{} , ResponseForEmail{} , errors.New("error unmarshaling sport")
 	}
 
 	var game string 
@@ -181,17 +178,14 @@ func (rp repoPerson) ConfirmRequest(ctx context.Context , requestBody AcceptRequ
 		break
 	}
 
-	
-	err = pkg.SendEmail(email, 
-		"✅ You're In! Join Request Confirmed", 
-		fmt.Sprintf("Congratulations! %v has accepted your join request to play %v. You're now part of the squad! 🔥\n\nPrepare yourself, gear up, and get ready for an epic gaming session.\n\nSee you in the game! 🎮",creatorName , game),
-	)
-	if err != nil {
-		return AcceptRequestData{} , err 
-	}
+	var responseForEmail ResponseForEmail 
+	responseForEmail.CreatorName = creatorName 
+	responseForEmail.Sport = game 
+	responseForEmail.Email = email
 
-	return data , nil	
+	return data , responseForEmail , nil	
 }
+
 
 func (rp  repoPerson) DeleteRequest(ctx context.Context , request_id int) (sql.Result , error) {
 	db := sqlx.NewDb(rp.DB, "postgres")
@@ -204,31 +198,31 @@ func (rp  repoPerson) DeleteRequest(ctx context.Context , request_id int) (sql.R
 	return result , nil 
 }
 
-func (rp repoPerson) RejectParticipant(ctx context.Context , participant_id int) (error) {
+func (rp repoPerson) RejectParticipant(ctx context.Context , participant_id int) (ResponseForEmail , error) {
 	db := sqlx.NewDb(rp.DB, "postgres")
 	
 	var user_id int 
 	err := db.Get(&user_id , "SELECT user_id from participants WHERE id = $1" , participant_id) 
 	if err != nil {
-		return err 
+		return ResponseForEmail{} , err 
 	}	
 
 	var email string 
 	err = db.Get(&email , pkg.GetEmailById , user_id) 
 	if err != nil {
-		return err
+		return ResponseForEmail{} , err
 	}
 
 	var request_id int 
 	err = db.Get(&request_id , "SELECT request_id from participants WHERE id = $1" , participant_id) 
 	if err != nil {
-		return err 
+		return ResponseForEmail{} , err 
 	}
 
 	var creator_id int 
 	err = db.Get(&creator_id , "SELECT user_id from requests WHERE id = $1" , request_id) 
 	if err != nil {
-		return err 
+		return ResponseForEmail{} , err 
 	}
 
 	var creatorName string 
@@ -236,17 +230,17 @@ func (rp repoPerson) RejectParticipant(ctx context.Context , participant_id int)
 
 	err = db.Get(&creatorName , pkg.GetNameByIdQuery , creator_id) 
 	if err != nil {
-		return err 
+		return ResponseForEmail{} , err 
 	}
 
 	err = db.Get(&sport , pkg.GetSportByRequestId , request_id) 
 	if err != nil {
-		return err  
+		return ResponseForEmail{} , err  
 	}
 	var sportMap map[string]string 
 	err = json.Unmarshal(sport , &sportMap) 
 	if err != nil {
-		return err 
+		return ResponseForEmail{} , err 
 	}
 
 	var game string 
@@ -255,22 +249,18 @@ func (rp repoPerson) RejectParticipant(ctx context.Context , participant_id int)
 		break
 	}
 
+	var responseForEmail ResponseForEmail 
+	responseForEmail.CreatorName = creatorName 
+	responseForEmail.Sport = game 
+	responseForEmail.Email = email
+
 
 	_, err = db.Exec(pkg.RejectParticipantQuery , participant_id)  
 	if err != nil {
-		return fmt.Errorf("failed to delete item: %v", err)	
+		return ResponseForEmail{} , fmt.Errorf("failed to delete item: %v", err)	
 	}
 
-	err = pkg.SendEmail(email, 
-		fmt.Sprintf("❌ Oops! Join Request Rejected by %v" , creatorName), 
-		fmt.Sprintf("Hey there, unfortunately, your request to join the game %v was not accepted this time. But don’t worry, new opportunities are always around the corner! 🌟\n\nKeep exploring, find another game, and show them what they’re missing!\n\nBetter luck next time! 🎮",game), 
-	)
-	if err != nil {
-		return err 
-	}
-	
-
-	return nil 
+	return responseForEmail , nil 
 }
 
 func (rp repoPerson) CreateRequest(ctx context.Context , requestBody Request) (Request , error) {

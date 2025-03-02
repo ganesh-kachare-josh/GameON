@@ -40,3 +40,10 @@ type ParticipantData struct {
 	Name   string `json:"name"`
 	Status string `json:"status"`
 }
+
+type ResponseForEmail struct {
+	CreatorName string  
+	ParticipantName string
+    Sport string
+	Email string
+}

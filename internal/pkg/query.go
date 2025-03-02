@@ -10,7 +10,7 @@ const GetAllParticipantsQuery = "SELECT p.id, p.user_id, u.name , p.status FROM 
 
 const AcceptRequestQuery = "INSERT INTO participants (request_id , user_id , status) VALUES($1 ,$2 ,$3) RETURNING *"
 
-const ConfirmRequestQuery = "UPDATE participants SET status = REPLACE(status , 'Pending' , 'Confirmed') WHERE request_id = $1 AND user_id = $2 RETURNING *"
+const ConfirmRequestQuery = "UPDATE participants SET status = 'Confirmed' WHERE request_id = $1 AND user_id = $2 RETURNING *"
 
 const DeleteRequestQuery = "DELETE FROM requests WHERE id = $1"
 

@@ -15,10 +15,10 @@ type Service interface {
 	GetRequestById(ctx context.Context , request_id int) (Request , error) 
 	GetAllRequests(ctx context.Context) ([]Request , error)
 	GetAllParticipants(ctx context.Context , request_id int)([]ParticipantData)
-	AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error)
-	ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error) 
+	AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , ResponseForEmail , error)
+	ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , ResponseForEmail , error) 
 	DeleteRequest(ctx context.Context , request_id int) (sql.Result , error)
-	RejectParticipant(ctx context.Context , participant_id int) (error)
+	RejectParticipant(ctx context.Context , participant_id int) (ResponseForEmail , error)
 	CreateRequest(ctx context.Context , requestBody Request) (Request , error) 
 }
 
@@ -52,28 +52,32 @@ func (s *service) GetAllParticipants(ctx context.Context , request_id int) ([]Pa
 		return result
 }
 
-func (s *service) AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error) {
-	response , err := s.requestRepo.AcceptRequest(ctx , repository.AcceptRequestBody(requestBody))
+func (s *service) AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , ResponseForEmail , error) {
+	response , emailResponse , err := s.requestRepo.AcceptRequest(ctx , repository.AcceptRequestBody(requestBody))
 	if err != nil {
-		return AcceptRequestData{} , err 
+		return AcceptRequestData{} , ResponseForEmail{} , err 
 	} 
-	return AcceptRequestData(response) , nil 
+	return AcceptRequestData(response) , ResponseForEmail(emailResponse) , nil  
 }
 
-func (s *service) ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error) {
-	response , err  := s.requestRepo.ConfirmRequest(ctx , repository.AcceptRequestBody(requestBody))
+func (s *service) ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , ResponseForEmail , error) {
+	response , emailResponse , err  := s.requestRepo.ConfirmRequest(ctx , repository.AcceptRequestBody(requestBody))
 	if err != nil {
-		return AcceptRequestData{} , err 
+		return AcceptRequestData{} , ResponseForEmail{} , err 
 	}
-	return AcceptRequestData(response) , nil 
+	return AcceptRequestData(response) , ResponseForEmail(emailResponse) , nil 
 }
 
 func (s *service) DeleteRequest(ctx context.Context , request_id int) (sql.Result , error) {
 	return s.requestRepo.DeleteRequest(ctx , request_id)
 }
 
-func (s *service) RejectParticipant(ctx context.Context , participant_id int) (error) {
-	return s.requestRepo.RejectParticipant(ctx , participant_id)
+func (s *service) RejectParticipant(ctx context.Context , participant_id int) (ResponseForEmail , error) {
+	emailResponse , err :=  s.requestRepo.RejectParticipant(ctx , participant_id)
+	if err != nil {
+		return ResponseForEmail{} , err 
+	}
+	return ResponseForEmail(emailResponse) , nil 
 }
 
 func (s *service) CreateRequest(ctx context.Context , requestBody Request) (Request, error) {

@@ -7,6 +7,8 @@ import (
 	"strconv"
 
 	"github.com/gorilla/mux"
+	"github.com/ganesh-kachare-josh/GameON/internal/pkg"
+
 )
 
 func GetRequestById(requestService Service)(func (w http.ResponseWriter , r *http.Request)) {
@@ -114,7 +116,7 @@ func AcceptRequest(acceptRequestService Service) (func (w http.ResponseWriter , 
 
 		body.Request_id = request_id 
 
-		response , err := acceptRequestService.AcceptRequest(ctx , body )
+		response , emailResponse , err := acceptRequestService.AcceptRequest(ctx , body )
 		if err != nil {
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 			return
@@ -126,6 +128,16 @@ func AcceptRequest(acceptRequestService Service) (func (w http.ResponseWriter , 
 		if err != nil {
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 		}
+
+		err = pkg.SendEmail(emailResponse.Email, 
+		fmt.Sprintf("🎉 Game On! %v Your Request Was Accepted!" , emailResponse.CreatorName), 
+		fmt.Sprintf("Great news! %v has accepted your game request to play %v. Get ready to jump into action and enjoy the thrill! 🚀\n\nLog in now to check the details and start gaming!\n\nHappy Gaming! 🎮" , emailResponse.ParticipantName , emailResponse.Sport),
+		)
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusInternalServerError)
+		}
+
+	
 	}
 }
 
@@ -155,7 +167,7 @@ func ConfirmRequest(confirmRequestService Service) (func (w http.ResponseWriter 
 
 		body.Request_id = request_id 
 
-		response , err  := confirmRequestService.ConfirmRequest(ctx , body) 
+		response , emailResponse , err  := confirmRequestService.ConfirmRequest(ctx , body) 
 		if err != nil {
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 			return
@@ -163,6 +175,14 @@ func ConfirmRequest(confirmRequestService Service) (func (w http.ResponseWriter 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK) 
 		err = json.NewEncoder(w).Encode(response)
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusInternalServerError)
+		}
+
+		err = pkg.SendEmail(emailResponse.Email, 
+		"✅ You're In! Join Request Confirmed", 
+		fmt.Sprintf("Congratulations! %v has accepted your join request to play %v. You're now part of the squad! 🔥\n\nPrepare yourself, gear up, and get ready for an epic gaming session.\n\nSee you in the game! 🎮",emailResponse.CreatorName , emailResponse.Sport),
+		)
 		if err != nil {
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 		}
@@ -229,7 +249,7 @@ func RejectParticipant(rejectRequest Service) (func (w http.ResponseWriter , r *
 			return
 		} 
 
-		err = rejectRequest.RejectParticipant(ctx , participant_id)
+		emailResponse , err := rejectRequest.RejectParticipant(ctx , participant_id)
 		if err != nil {
 			http.Error(w,fmt.Sprintf("failed to delete request: %v", err),http.StatusInternalServerError)
 			return
@@ -243,6 +263,15 @@ func RejectParticipant(rejectRequest Service) (func (w http.ResponseWriter , r *
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(msg)
+
+		err = pkg.SendEmail(emailResponse.Email, 
+			fmt.Sprintf("❌ Oops! Join Request Rejected by %v" , emailResponse.CreatorName), 
+			fmt.Sprintf("Hey there, unfortunately, your request to join the game %v was not accepted this time. But don’t worry, new opportunities are always around the corner! 🌟\n\nKeep exploring, find another game, and show them what they’re missing!\n\nBetter luck next time! 🎮",emailResponse.Sport), 
+		)
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusInternalServerError)
+		}
+		
 	}
 }
 

@@ -74,3 +74,10 @@ type LoginResponse struct {
 type LogoutResponse struct {
 	Message string
 }
+
+type ResponseForEmail struct {
+	CreatorName string  
+	ParticipantName string
+    Sport string
+	Email string
+}
