@@ -79,33 +79,6 @@ func Register(authService Service) func(w http.ResponseWriter, r *http.Request) 
     }
 }
 
-func Logout(authService Service) func(w http.ResponseWriter, r *http.Request) {
-    return func(w http.ResponseWriter, r *http.Request) {
-
-        ctx := r.Context()
-        response := authService.Logout(ctx)
-
-        cookie := http.Cookie{
-            Name:     "auth_token",
-            Value:    "",
-            HttpOnly: true,
-            Secure:   false,
-            Path:     "/",
-            SameSite: http.SameSiteLaxMode,
-            MaxAge:   -1,
-        }
-
-        http.SetCookie(w, &cookie)
-
-        w.WriteHeader(http.StatusOK)
-        err := json.NewEncoder(w).Encode(response)
-        if err != nil {
-            http.Error(w, err.Error(), http.StatusInternalServerError)
-        }
-
-    }
-}
-
 func IsLogin(authService Service) func(w http.ResponseWriter, r *http.Request) {
     return func(w http.ResponseWriter, r *http.Request) {
 
@@ -114,7 +87,7 @@ func IsLogin(authService Service) func(w http.ResponseWriter, r *http.Request) {
         authHeader := r.Header.Get("Authorization")
         if authHeader == "" {
             loginstatus.User_id = 0
-            loginstatus.Islogin = false
+            loginstatus.Is_login = false
             err := json.NewEncoder(w).Encode(loginstatus)
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -126,7 +99,7 @@ func IsLogin(authService Service) func(w http.ResponseWriter, r *http.Request) {
         tokenString := strings.TrimPrefix(authHeader, "Bearer ")
         if tokenString == authHeader { // If no "Bearer " prefix was found
             loginstatus.User_id = 0
-            loginstatus.Islogin = false
+            loginstatus.Is_login = false
             err := json.NewEncoder(w).Encode(loginstatus)
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -138,7 +111,7 @@ func IsLogin(authService Service) func(w http.ResponseWriter, r *http.Request) {
 
         if err != nil {
             loginstatus.User_id = 0
-            loginstatus.Islogin = false
+            loginstatus.Is_login = false
             err := json.NewEncoder(w).Encode(loginstatus)
             if err != nil {
                 http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -147,7 +120,7 @@ func IsLogin(authService Service) func(w http.ResponseWriter, r *http.Request) {
         }
 
         loginstatus.User_id = user_id
-        loginstatus.Islogin = true
+        loginstatus.Is_login = true
         err = json.NewEncoder(w).Encode(loginstatus)
         if err != nil {
             http.Error(w, err.Error(), http.StatusInternalServerError)

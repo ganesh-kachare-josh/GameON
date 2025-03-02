@@ -33,7 +33,6 @@ func NewRouter(deps Dependencies) *mux.Router {
 	// Authentication Routes.
 	router.HandleFunc("/login", auth.Login(deps.AuthService)).Methods(http.MethodPost)
 	router.HandleFunc("/register", auth.Register(deps.AuthService)).Methods(http.MethodPost)
-	router.HandleFunc("/logout" ,middleware.AuthenticationMiddleware(auth.Logout(deps.AuthService))).Methods(http.MethodPost)
 	router.HandleFunc("/islogin" ,auth.IsLogin(deps.AuthService)).Methods(http.MethodGet) 
 	return router
 

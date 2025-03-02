@@ -15,6 +15,13 @@ type RegisterData struct {
 }
 
 type LoginStatus struct {
-	User_id int
-	Islogin bool
+	User_id  int  `json:"user_id"`
+	Is_login bool `json:"is_login"`
+}
+
+type LoginResponse struct {
+	Id    int    `json:"id"`
+	Email string `json:"email"`
+	Name  string `json:"name"`
+	Token string `json:"token"`
 }

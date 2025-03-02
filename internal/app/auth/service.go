@@ -6,21 +6,20 @@ import (
 )
 
 type Service interface {
-	Login(ctx context.Context, requestBody repository.Login) (repository.LoginResponse, error)
+	Login(ctx context.Context, requestBody repository.Login) (LoginResponse, error)
 	Register(ctx context.Context, requestBody RegisterData) (RegisterData, error)
-	Logout(ctx context.Context) (repository.LogoutResponse)
 }
 
 type service struct {
 	authRepo repository.RepoAuth
 }
 
-func (s *service) Login(ctx context.Context, requestBody repository.Login) (repository.LoginResponse, error) {
+func (s *service) Login(ctx context.Context, requestBody repository.Login) (LoginResponse, error) {
 	login, err := s.authRepo.Login(ctx, repository.Login(requestBody))
 	if err != nil {
-		return repository.LoginResponse{}, err
+		return LoginResponse{}, err
 	}
-	return login, nil
+	return LoginResponse(login) , err 
 }
 
 func (s *service) Register(ctx context.Context, requestBody RegisterData) (RegisterData, error) {
@@ -29,10 +28,6 @@ func (s *service) Register(ctx context.Context, requestBody RegisterData) (Regis
 		return RegisterData{}, err
 	}
 	return RegisterData(register), nil
-}
-
-func (s *service) Logout(ctx context.Context) (repository.LogoutResponse) {
-	return s.authRepo.Logout(ctx)
 }
 
 func NewService(authRepo repository.RepoAuth) Service {

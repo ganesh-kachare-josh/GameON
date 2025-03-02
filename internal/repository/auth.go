@@ -17,7 +17,6 @@ type repoAuth struct {
 type RepoAuth interface {
 	Login(ctx context.Context, requestBody Login) (LoginResponse, error)
 	Register(ctx context.Context, requestBody Register) (Register, error)
-	Logout(ctx context.Context)(LogoutResponse)
 }
 
 func NewAuthRepo(db *sql.DB) RepoAuth {
@@ -90,8 +89,4 @@ func (ra repoAuth) Register(ctx context.Context, requestBody Register) (Register
 	}
 	register.Password = originalPassword // Reassigning original password to requestBody.
 	return register, nil
-}
-
-func (ra repoAuth) Logout(ctx context.Context)(LogoutResponse) {
-	return LogoutResponse{Message: "User Logged Out."}
 }
