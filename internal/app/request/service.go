@@ -13,8 +13,8 @@ type service struct {
 
 type Service interface {
 	GetRequestById(ctx context.Context , request_id int) (Request , error) 
-	GetAllRequests(ctx context.Context) ([]repository.Request , error)
-	GetAllParticipants(ctx context.Context , request_id int)([]repository.ParticipantData)
+	GetAllRequests(ctx context.Context) ([]Request , error)
+	GetAllParticipants(ctx context.Context , request_id int)([]ParticipantData)
 	AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error)
 	ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error) 
 	DeleteRequest(ctx context.Context , request_id int) (sql.Result , error)
@@ -30,17 +30,26 @@ func (s *service ) GetRequestById(ctx context.Context , request_id int) (Request
 		return Request(request) , nil 
 }
 
-func (s *service ) GetAllRequests(ctx context.Context) ([]repository.Request , error) {
+func (s *service ) GetAllRequests(ctx context.Context) ([]Request, error) {
 	    requests , err := s.requestRepo.GetAllRequests(ctx) 
 		if err != nil {
-			return []repository.Request{} , err 
+			return []Request{} , err 
 		}
-		return  requests, nil 
+		// var Requests []Request
+		var result []Request
+    	for _, r := range requests {
+        	result = append(result, Request(r))
+    	}
+		return  result, nil 
 }
 
-func (s *service) GetAllParticipants(ctx context.Context , request_id int) ([]repository.ParticipantData) {
+func (s *service) GetAllParticipants(ctx context.Context , request_id int) ([]ParticipantData) {
 		participants := s.requestRepo.GetAllParticipants(ctx , request_id)
-		return participants
+		var result []ParticipantData
+    	for _, r := range participants {
+        	result = append(result, ParticipantData(r))
+    	}
+		return result
 }
 
 func (s *service) AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error) {

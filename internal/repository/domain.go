@@ -6,16 +6,17 @@ import (
 )
 
 type Request struct {
-	Id         int             `db:"id"`
-	User_id    int             `db:"user_id"`
-	Sport      json.RawMessage `db:"sport"`
-	Location   string          `db:"location"`
-	Time       time.Time       `db:"time"`
-	CourtPrice float64         `db:"court_price"`
-	Status     string          `db:"status"`
+	Id           int             `db:"id"`
+	User_id      int             `db:"user_id"`
+	Name         string          `db:"name"`
+	Email        string          `db:"email"`
+	Phone_Number string          `db:"phone_number"`
+	Sport        json.RawMessage `db:"sport"`
+	Location     string          `db:"location"`
+	Time         time.Time       `db:"time"`
+	CourtPrice   float64         `db:"court_price"`
+	Status       string          `db:"status"`
 }
-
-var Requests []Request
 
 type Login struct {
 	Id       int    `db:"id"`
@@ -37,6 +38,7 @@ type Register struct {
 type ParticipantData struct {
 	Id     int    `db:"id"`
 	UserId int    `db:"user_id"`
+	Name   string `db:"name"`
 	Status string `db:"status"`
 }
 
@@ -51,7 +53,7 @@ type AcceptRequestData struct {
 
 type AcceptRequestBody struct {
 	Request_id int
-	User_id    int 
+	User_id    int
 }
 
 type UserData struct {

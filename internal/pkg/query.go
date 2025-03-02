@@ -4,9 +4,9 @@ package pkg
 // Request Queries
 const GetRequestByIdQuery = "SELECT id , user_id , sport , location , time , court_price , status FROM requests WHERE id = $1"
 
-const GetAllRequestsQuery = "SELECT id , user_id , sport , location , time , court_price , status FROM requests"
+const GetAllRequestsQuery = "SELECT requests.id, requests.user_id, requests.sport, requests.location, requests.time,requests.court_price, requests.status, users.name, users.email, users.phone_number FROM requests JOIN users ON requests.user_id = users.id"
 
-const GetAllParticipantsQuery = "SELECT id , user_id , status FROM participants WHERE request_id = $1"
+const GetAllParticipantsQuery = "SELECT p.id, p.user_id, u.name , p.status FROM participants p JOIN users u ON p.user_id = u.id WHERE p.request_id = $1"
 
 const AcceptRequestQuery = "INSERT INTO participants (request_id , user_id , status) VALUES($1 ,$2 ,$3) RETURNING *"
 
