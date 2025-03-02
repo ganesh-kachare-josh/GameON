@@ -7,10 +7,11 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/joho/godotenv"
-	_ "github.com/lib/pq"
 	database "github.com/ganesh-kachare-josh/GameON"
 	"github.com/ganesh-kachare-josh/GameON/internal/app"
+	"github.com/ganesh-kachare-josh/GameON/internal/pkg/middleware"
+	"github.com/joho/godotenv"
+	_ "github.com/lib/pq"
 )
 
 
@@ -35,10 +36,11 @@ func main() {
 	// Injecting dependencies.
     services := app.NewServices(sql) 
 	router := app.NewRouter(services) 
-
+	
+	handler := middleware.CORS(router)
 	srv := &http.Server {
 		Addr: ":" + os.Getenv("port"),
-		Handler: router,
+		Handler: handler,
 	}
 
 	fmt.Printf("Server is running on port : %v" , os.Getenv("port")) 

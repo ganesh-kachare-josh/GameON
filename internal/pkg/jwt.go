@@ -58,3 +58,19 @@ func VerifyToken(tokenString string) (*jwt.Token, error) {
 	// Return the verified token
 	return token, nil
 }
+
+func GetUserIdFromToken(tokenString string) (int , error) {
+	token , err := VerifyToken(tokenString) 
+	if err != nil {
+		return 0 , err 
+	} 
+
+	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+		// Extract user_id from the claims
+		userID, ok := claims["user_id"].(float64) // user_id in claims should be a float64 type
+		if ok {
+			return int(userID), nil // Return user_id as an integer
+		}
+	}
+	return 0 , err 
+}

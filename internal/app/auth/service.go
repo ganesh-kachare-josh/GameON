@@ -6,7 +6,7 @@ import (
 )
 
 type Service interface {
-	Login(ctx context.Context, requestBody LoginData) (repository.LoginResponse, error)
+	Login(ctx context.Context, requestBody repository.Login) (repository.LoginResponse, error)
 	Register(ctx context.Context, requestBody RegisterData) (RegisterData, error)
 	Logout(ctx context.Context) (repository.LogoutResponse)
 }
@@ -15,7 +15,7 @@ type service struct {
 	authRepo repository.RepoAuth
 }
 
-func (s *service) Login(ctx context.Context, requestBody LoginData) (repository.LoginResponse, error) {
+func (s *service) Login(ctx context.Context, requestBody repository.Login) (repository.LoginResponse, error) {
 	login, err := s.authRepo.Login(ctx, repository.Login(requestBody))
 	if err != nil {
 		return repository.LoginResponse{}, err
