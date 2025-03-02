@@ -10,8 +10,6 @@ import (
 	"github.com/lib/pq"
 )
 
-const registerUserQuery = "INSERT INTO users (name , email , password , phone_number , sports , created_at) VALUES ($1 , $2 , $3 , $4 , $5 , NOW()) RETURNING id , name , email , password , phone_number , sports , created_at"
-
 type repoAuth struct {
 	DB *sql.DB
 }
@@ -73,7 +71,7 @@ func (ra repoAuth) Register(ctx context.Context, requestBody Register) (Register
 
 	requestBody.Password = hashedPassword // Assigning hashed password to requestBody
 
-	err = db.Get(&register, registerUserQuery, requestBody.Name, requestBody.Email, requestBody.Password, requestBody.Phone_Number, requestBody.Sport)
+	err = db.Get(&register, pkg.RegisterUserQuery, requestBody.Name, requestBody.Email, requestBody.Password, requestBody.Phone_Number, requestBody.Sport)
 
 	if err != nil {
 

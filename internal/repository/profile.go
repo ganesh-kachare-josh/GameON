@@ -6,10 +6,8 @@ import (
 	"fmt"
 
 	"github.com/jmoiron/sqlx"
+	"github.com/ganesh-kachare-josh/GameON/internal/pkg"
 )
-
-const GetUserByIdQuery = "SELECT id , name , email , sports , phone_number FROM users WHERE id = $1"
-
 type profileRepo struct {
 	DB *sql.DB
 }
@@ -29,7 +27,7 @@ func (rp profileRepo) GetUserById(ctx context.Context , user_id int) (UserData ,
 	
 	var user UserData 
 
-	err := db.Get(&user , GetUserByIdQuery , user_id) 
+	err := db.Get(&user , pkg.GetUserByIdQuery , user_id) 
 	if err != nil {
 		return UserData{} , fmt.Errorf("user Does Not Exist") 
 	}

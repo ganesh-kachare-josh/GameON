@@ -1,5 +1,7 @@
 package pkg 
 
+
+// Request Queries
 const GetRequestByIdQuery = "SELECT id , user_id , sport , location , time , court_price , status FROM requests WHERE id = $1"
 
 const GetAllRequestsQuery = "SELECT id , user_id , sport , location , time , court_price , status FROM requests"
@@ -23,3 +25,11 @@ const GetUserIdByRequestId = "SELECT user_id FROM requests WHERE id = $1"
 const GetNameByIdQuery = "SELECT name from users WHERE id = $1"
 
 const GetSportByRequestId = "SELECT sport from requests WHERE id = $1"
+
+
+// Profile Queries 
+const GetUserByIdQuery = "SELECT id , name , email , sports , phone_number FROM users WHERE id = $1" 
+
+
+// Authentication Queries 
+const RegisterUserQuery = "INSERT INTO users (name , email , password , phone_number , sports , created_at) VALUES ($1 , $2 , $3 , $4 , $5 , NOW()) RETURNING id , name , email , password , phone_number , sports , created_at"
