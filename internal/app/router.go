@@ -15,6 +15,7 @@ func NewRouter(deps Dependencies) *mux.Router {
 
 	
 	// Request Routes
+	router.HandleFunc("/request/joined",middleware.AuthenticationMiddleware(request.GetJoinedRequestById(deps.RequestService))).Methods(http.MethodGet)	
 	router.HandleFunc("/request/{id}", middleware.AuthenticationMiddleware(request.GetRequestById(deps.RequestService))).Methods(http.MethodGet)
 	router.HandleFunc("/requests", middleware.AuthenticationMiddleware(request.GetAllRequests(deps.RequestService))).Methods(http.MethodGet)
 	router.HandleFunc("/request/{id}/participants",middleware.AuthenticationMiddleware(request.GetAllParticipants(deps.RequestService))).Methods(http.MethodGet)
@@ -23,6 +24,7 @@ func NewRouter(deps Dependencies) *mux.Router {
 	router.HandleFunc("/request/{request_id}",middleware.AuthenticationMiddleware(request.DeleteRequest(deps.RequestService))).Methods(http.MethodDelete)
 	router.HandleFunc("/participants/{pid}",middleware.AuthenticationMiddleware(request.RejectParticipant(deps.RequestService))).Methods(http.MethodDelete)
 	router.HandleFunc("/request",middleware.AuthenticationMiddleware(request.CreateRequest(deps.RequestService))).Methods(http.MethodPost)
+	
 
 
 	// Profile Routes

@@ -24,6 +24,7 @@ type RepoPerson interface {
 	 DeleteRequest(ctx context.Context , request_id int) (sql.Result , error)
 	 RejectParticipant(ctx context.Context , participant_id int) (ResponseForEmail , error)
 	 CreateRequest(ctx context.Context , requestBody Request) (Request , error)
+	 GetJoinedRequestById(ctx context.Context , user_id int )([]int , error)
 }
 
 func NewRepo(db *sql.DB) (RepoPerson) {
@@ -272,4 +273,16 @@ func (rp repoPerson) CreateRequest(ctx context.Context , requestBody Request) (R
 		return Request{} , err 
 	}
 	return responseBody , nil 
+}
+
+func (rp repoPerson) GetJoinedRequestById(ctx context.Context , user_id int )([]int , error) {
+	db := sqlx.NewDb(rp.DB , "postgres") 
+
+	var data []int 
+
+	err := db.Select(&data , pkg.GetJoinedRequestByIdQuery , user_id) 
+	if err != nil {
+		return []int{} , err 
+	}
+	return data , nil 
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/ganesh-kachare-josh/GameON/internal/pkg"
@@ -164,7 +165,7 @@ func ConfirmRequest(confirmRequestService Service) (func (w http.ResponseWriter 
 			http.Error(w ,"failed to decode request body",http.StatusInternalServerError) 
 			return 
 		}
-		
+
 		body.Request_id = request_id
 		response , emailResponse , err  := confirmRequestService.ConfirmRequest(ctx , body) 
 		if err != nil {
@@ -303,5 +304,47 @@ func CreateRequest(createRequest Service) func (w http.ResponseWriter , r *http.
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 		}
 
+	}
+}
+
+func GetJoinedRequestById(requestService Service) (func (w http.ResponseWriter , r *http.Request)) {
+	return func(w http.ResponseWriter , r *http.Request) {
+		ctx := r.Context() 
+
+		authHeader := r.Header.Get("Authorization")
+        if authHeader == "" {
+            http.Error(w, "invalid authorization header", http.StatusInternalServerError)   
+            return
+		}
+
+        // Split to get the token part
+        tokenString := strings.TrimPrefix(authHeader, "Bearer ")
+        if tokenString == authHeader { // If no "Bearer " prefix was found
+            http.Error(w, "invalid header formate", http.StatusInternalServerError)
+            return
+        }
+		
+        user_id, err := pkg.GetUserIdFromToken(tokenString)
+		if err != nil {
+			http.Error(w , err.Error() , http.StatusInternalServerError)
+			return
+		}
+		
+		var response JoinedRequestDetails
+		var res []int 
+
+		res , err = requestService.GetJoinedRequestById(ctx , user_id)
+		if err != nil {
+			http.Error(w , err.Error() , http.StatusInternalServerError)
+			return 
+		}
+		response.JoinedRequests = res 
+
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		err = json.NewEncoder(w).Encode(response)
+		if err != nil {	
+			http.Error(w,err.Error(),http.StatusInternalServerError)
+		}
 	}
 }

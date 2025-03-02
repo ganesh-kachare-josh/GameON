@@ -20,6 +20,7 @@ type Service interface {
 	DeleteRequest(ctx context.Context , request_id int) (sql.Result , error)
 	RejectParticipant(ctx context.Context , participant_id int) (ResponseForEmail , error)
 	CreateRequest(ctx context.Context , requestBody Request) (Request , error) 
+	GetJoinedRequestById(ctx context.Context , user_id int)([]int , error)
 }
 
 func (s *service ) GetRequestById(ctx context.Context , request_id int) (Request , error) {
@@ -86,6 +87,10 @@ func (s *service) CreateRequest(ctx context.Context , requestBody Request) (Requ
 		return Request{} , err 
 	}
 	return Request(response) , nil 
+}
+
+func (s *service) GetJoinedRequestById(ctx context.Context , user_id int)([]int , error){
+	return s.requestRepo.GetJoinedRequestById(ctx , user_id) 
 }
 
 func NewService(requestRepo repository.RepoPerson) (Service) {

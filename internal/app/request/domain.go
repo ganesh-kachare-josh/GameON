@@ -42,8 +42,12 @@ type ParticipantData struct {
 }
 
 type ResponseForEmail struct {
-	CreatorName string  
+	CreatorName     string
 	ParticipantName string
-    Sport string
-	Email string
+	Sport           string
+	Email           string
+}
+
+type JoinedRequestDetails struct {
+	JoinedRequests []int `json:"joined_requests"`
 }

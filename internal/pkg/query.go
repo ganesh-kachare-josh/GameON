@@ -26,6 +26,8 @@ const GetNameByIdQuery = "SELECT name from users WHERE id = $1"
 
 const GetSportByRequestId = "SELECT sport from requests WHERE id = $1"
 
+const GetJoinedRequestByIdQuery = "SELECT request_id FROM participants WHERE user_id = $1"
+
 
 // Profile Queries 
 const GetUserByIdQuery = "SELECT id , name , email , sports , phone_number , created_at FROM users WHERE id = $1" 
