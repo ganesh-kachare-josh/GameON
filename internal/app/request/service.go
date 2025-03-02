@@ -15,8 +15,8 @@ type Service interface {
 	GetRequestById(ctx context.Context , request_id int) (Request , error) 
 	GetAllRequests(ctx context.Context) ([]repository.Request , error)
 	GetAllParticipants(ctx context.Context , request_id int)([]repository.ParticipantData)
-	AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
-	ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
+	AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error)
+	ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error) 
 	DeleteRequest(ctx context.Context , request_id int) (sql.Result , error)
 	RejectParticipant(ctx context.Context , participant_id int) (error)
 	CreateRequest(ctx context.Context , requestBody Request) (repository.Request , error) 
@@ -43,14 +43,20 @@ func (s *service) GetAllParticipants(ctx context.Context , request_id int) ([]re
 		return participants
 }
 
-func (s *service) AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData) {
-	response := s.requestRepo.AcceptRequest(ctx , repository.AcceptRequestBody(requestBody)) 
-	return AcceptRequestData(response)
+func (s *service) AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error) {
+	response , err := s.requestRepo.AcceptRequest(ctx , repository.AcceptRequestBody(requestBody))
+	if err != nil {
+		return AcceptRequestData{} , err 
+	} 
+	return AcceptRequestData(response) , nil 
 }
 
-func (s *service) ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData) {
-	response := s.requestRepo.ConfirmRequest(ctx , repository.AcceptRequestBody(requestBody))
-	return AcceptRequestData(response)
+func (s *service) ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error) {
+	response , err  := s.requestRepo.ConfirmRequest(ctx , repository.AcceptRequestBody(requestBody))
+	if err != nil {
+		return AcceptRequestData{} , err 
+	}
+	return AcceptRequestData(response) , nil 
 }
 
 func (s *service) DeleteRequest(ctx context.Context , request_id int) (sql.Result , error) {

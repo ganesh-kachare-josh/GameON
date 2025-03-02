@@ -114,8 +114,12 @@ func AcceptRequest(acceptRequestService Service) (func (w http.ResponseWriter , 
 
 		body.Request_id = request_id 
 
-		response := acceptRequestService.AcceptRequest(ctx , body ) 
-
+		response , err := acceptRequestService.AcceptRequest(ctx , body )
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusInternalServerError)
+			return
+		}
+		
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK) 
 		err = json.NewEncoder(w).Encode(response)
@@ -151,8 +155,11 @@ func ConfirmRequest(confirmRequestService Service) (func (w http.ResponseWriter 
 
 		body.Request_id = request_id 
 
-		response := confirmRequestService.ConfirmRequest(ctx , body) 
-
+		response , err  := confirmRequestService.ConfirmRequest(ctx , body) 
+		if err != nil {
+			http.Error(w,err.Error(),http.StatusInternalServerError)
+			return
+		}
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK) 
 		err = json.NewEncoder(w).Encode(response)

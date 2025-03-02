@@ -50,7 +50,7 @@ type AcceptRequestData struct {
 
 type AcceptRequestBody struct {
 	Request_id int
-	User_id    int
+	User_id    int 
 }
 
 type UserData struct {

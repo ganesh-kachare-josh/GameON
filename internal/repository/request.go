@@ -3,25 +3,13 @@ package repository
 import (
 	"context"
 	"database/sql"
-	"github.com/jmoiron/sqlx"
+	"encoding/json"
+	"errors"
 	"fmt"
+
+	"github.com/ganesh-kachare-josh/GameON/internal/pkg"
+	"github.com/jmoiron/sqlx"
 )
-
-const getRequestByIdQuery = "SELECT id , user_id , sport , location , time , court_price , status FROM requests WHERE id = $1"
-
-const GetAllRequestsQuery = "SELECT id , user_id , sport , location , time , court_price , status FROM requests"
-
-const GetAllParticipantsQuery = "SELECT id , user_id , status FROM participants WHERE request_id = $1"
-
-const AcceptRequestQuery = "INSERT INTO participants (request_id , user_id , status) VALUES($1 ,$2 ,$3) RETURNING *"
-
-const ConfirmRequestQuery = "UPDATE participants SET status = REPLACE(status , 'Pending' , 'Confirmed') WHERE request_id = $1 AND user_id = $2 RETURNING *"
-
-const DeleteRequestQuery = "DELETE FROM requests WHERE id = $1"
-
-const RejectParticipantQuery = "DELETE FROM participants WHERE id = $1"
-
-const CreateRequestQuery = "INSERT INTO requests (user_id , sport , location , time , court_price , status , created_at) VALUES($1,$2,$3,$4,$5,'Open',NOW()) RETURNING id , user_id , sport , location , time , court_price , status"
 
 type repoPerson struct {
 	DB *sql.DB
@@ -31,8 +19,8 @@ type RepoPerson interface {
      GetRequestById(ctx context.Context , request_id int ) (Request , error) 
 	 GetAllRequests(ctx context.Context) ([]Request , error) 
 	 GetAllParticipants(ctx context.Context , request_id int) ([]ParticipantData)
-	 AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
-	 ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData)
+	 AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error)
+	 ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error)
 	 DeleteRequest(ctx context.Context , request_id int) (sql.Result , error)
 	 RejectParticipant(ctx context.Context , participant_id int) (error)
 	 CreateRequest(ctx context.Context , requestBody Request) (Request , error)
@@ -49,7 +37,7 @@ func (rp repoPerson) GetRequestById(ctx context.Context , request_id int) (Reque
   	db := sqlx.NewDb(rp.DB , "postgres") 
 	var request Request 
 	
-	err := db.Get(&request , getRequestByIdQuery , request_id)  
+	err := db.Get(&request , pkg.GetRequestByIdQuery , request_id)  
 	if err != nil {
 		return Request{} , err 
 	}
@@ -62,7 +50,7 @@ func (rp repoPerson) GetAllRequests(ctx context.Context) ([]Request , error) {
 	db := sqlx.NewDb(rp.DB , "postgres") 
 	var requests []Request 
 
-	err := db.Select(&requests , GetAllRequestsQuery)  
+	err := db.Select(&requests ,pkg.GetAllRequestsQuery)  
 	if err != nil {
 		return []Request{} , err 
 	}
@@ -75,41 +63,140 @@ func (rp repoPerson) GetAllParticipants(ctx context.Context , request_id int) ([
 
 	var participants []ParticipantData 
 
-	err := db.Select(&participants , GetAllParticipantsQuery , request_id)
+	err := db.Select(&participants ,pkg.GetAllParticipantsQuery , request_id)
 	if err != nil {
 		return []ParticipantData{}
 	}
 	return participants
 }
 
-func (rp repoPerson) AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData) {
+func (rp repoPerson) AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error) {
 	db := sqlx.NewDb(rp.DB, "postgres") 
 
 	var data AcceptRequestData 
 
-	err := db.Get(&data , AcceptRequestQuery , requestBody.Request_id, requestBody.User_id , "Pending")
+	err := db.Get(&data , pkg.AcceptRequestQuery , requestBody.Request_id, requestBody.User_id , "Pending")
 	if err != nil {
-		return AcceptRequestData{}
+		return AcceptRequestData{} , err
 	}
-	return data
+
+	var userId int 
+	err = db.Get(&userId , pkg.GetUserIdByRequestId , requestBody.Request_id)
+	if err != nil {
+		return AcceptRequestData{} , nil 
+	} 
+
+	var email string 
+	err = db.Get(&email , pkg.GetEmailById , userId) 
+	if err != nil {
+		return AcceptRequestData{} , err 
+	}
+
+	var creatorName string 
+	var ParticipantName string  
+	var sport json.RawMessage 
+
+	err = db.Get(&creatorName , pkg.GetNameByIdQuery , userId) 
+	if err != nil {
+		return AcceptRequestData{} , errors.New("user doesn't exist") 
+	}
+
+	err = db.Get(&ParticipantName , pkg.GetNameByIdQuery , requestBody.User_id) 
+	if err != nil {
+		return AcceptRequestData{} , errors.New("participant doesn't exist") 
+	}
+
+	err = db.Get(&sport , pkg.GetSportByRequestId , requestBody.Request_id) 
+	if err != nil {
+		return AcceptRequestData{} , errors.New("participant doesn't exist") 
+	}
+	var sportMap map[string]string 
+	err = json.Unmarshal(sport , &sportMap) 
+	if err != nil {
+		return AcceptRequestData{} , errors.New("error unmarshaling sport")
+	}
+
+	var game string 
+	for key := range sportMap {
+		game = key 
+		break
+	}
+
+
+	err = pkg.SendEmail(email, 
+		fmt.Sprintf("🎉 Game On! %v Your Request Was Accepted!" , creatorName), 
+		fmt.Sprintf("Great news! %v has accepted your game request to play %v. Get ready to jump into action and enjoy the thrill! 🚀\n\nLog in now to check the details and start gaming!\n\nHappy Gaming! 🎮" , ParticipantName , game),
+	)
+	
+	if err != nil {
+		return AcceptRequestData{} , err 
+	}
+
+	return data , nil 
 }
 
-func (rp repoPerson) ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData) {
+func (rp repoPerson) ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , error) {
 	db := sqlx.NewDb(rp.DB, "postgres") 
 
 	var data AcceptRequestData 
 
-	err := db.Get(&data , ConfirmRequestQuery , requestBody.Request_id , requestBody.User_id)
+	err := db.Get(&data , pkg.ConfirmRequestQuery , requestBody.Request_id , requestBody.User_id)
 	if err != nil {
-		return AcceptRequestData{}
+		return AcceptRequestData{} , err 
 	}
-	return data
+
+	var email string 
+	err = db.Get(&email , pkg.GetEmailById , requestBody.User_id) 
+	if err != nil {
+		return AcceptRequestData{} , err 
+	} 
+
+	var userId int 
+	err = db.Get(&userId , pkg.GetUserIdByRequestId , requestBody.Request_id)
+	if err != nil {
+		return AcceptRequestData{} , nil 
+	}
+
+	var creatorName string 
+	var sport json.RawMessage 
+
+	err = db.Get(&creatorName , pkg.GetNameByIdQuery , userId) 
+	if err != nil {
+		return AcceptRequestData{} , errors.New("user doesn't exist") 
+	}
+
+	err = db.Get(&sport , pkg.GetSportByRequestId , requestBody.Request_id) 
+	if err != nil {
+		return AcceptRequestData{} , errors.New("participant doesn't exist") 
+	}
+	var sportMap map[string]string 
+	err = json.Unmarshal(sport , &sportMap) 
+	if err != nil {
+		return AcceptRequestData{} , errors.New("error unmarshaling sport")
+	}
+
+	var game string 
+	for key := range sportMap {
+		game = key 
+		break
+	}
+
+	
+	err = pkg.SendEmail(email, 
+		"✅ You're In! Join Request Confirmed", 
+		fmt.Sprintf("Congratulations! %v has accepted your join request to play %v. You're now part of the squad! 🔥\n\nPrepare yourself, gear up, and get ready for an epic gaming session.\n\nSee you in the game! 🎮",creatorName , game),
+	)
+	if err != nil {
+		return AcceptRequestData{} , err 
+	}
+
+	return data , nil	
 }
 
 func (rp  repoPerson) DeleteRequest(ctx context.Context , request_id int) (sql.Result , error) {
 	db := sqlx.NewDb(rp.DB, "postgres")
 	
-	result , err := db.Exec(DeleteRequestQuery , request_id) 
+	result , err := db.Exec(pkg.DeleteRequestQuery , request_id) 
 	if err != nil {
 		return result , fmt.Errorf("failed to delete item: %v", err)	
 	}
@@ -120,10 +207,69 @@ func (rp  repoPerson) DeleteRequest(ctx context.Context , request_id int) (sql.R
 func (rp repoPerson) RejectParticipant(ctx context.Context , participant_id int) (error) {
 	db := sqlx.NewDb(rp.DB, "postgres")
 	
-	_, err := db.Exec(RejectParticipantQuery , participant_id)  
+	var user_id int 
+	err := db.Get(&user_id , "SELECT user_id from participants WHERE id = $1" , participant_id) 
+	if err != nil {
+		return err 
+	}	
+
+	var email string 
+	err = db.Get(&email , pkg.GetEmailById , user_id) 
+	if err != nil {
+		return err
+	}
+
+	var request_id int 
+	err = db.Get(&request_id , "SELECT request_id from participants WHERE id = $1" , participant_id) 
+	if err != nil {
+		return err 
+	}
+
+	var creator_id int 
+	err = db.Get(&creator_id , "SELECT user_id from requests WHERE id = $1" , request_id) 
+	if err != nil {
+		return err 
+	}
+
+	var creatorName string 
+	var sport json.RawMessage  
+
+	err = db.Get(&creatorName , pkg.GetNameByIdQuery , creator_id) 
+	if err != nil {
+		return err 
+	}
+
+	err = db.Get(&sport , pkg.GetSportByRequestId , request_id) 
+	if err != nil {
+		return err  
+	}
+	var sportMap map[string]string 
+	err = json.Unmarshal(sport , &sportMap) 
+	if err != nil {
+		return err 
+	}
+
+	var game string 
+	for key := range sportMap {
+		game = key 
+		break
+	}
+
+
+	_, err = db.Exec(pkg.RejectParticipantQuery , participant_id)  
 	if err != nil {
 		return fmt.Errorf("failed to delete item: %v", err)	
 	}
+
+	err = pkg.SendEmail(email, 
+		fmt.Sprintf("❌ Oops! Join Request Rejected by %v" , creatorName), 
+		fmt.Sprintf("Hey there, unfortunately, your request to join the game %v was not accepted this time. But don’t worry, new opportunities are always around the corner! 🌟\n\nKeep exploring, find another game, and show them what they’re missing!\n\nBetter luck next time! 🎮",game), 
+	)
+	if err != nil {
+		return err 
+	}
+	
+
 	return nil 
 }
 
@@ -131,7 +277,7 @@ func (rp repoPerson) CreateRequest(ctx context.Context , requestBody Request) (R
 	db := sqlx.NewDb(rp.DB , "postgres") 
 
 	var responseBody Request 
-	err := db.Get(&responseBody , CreateRequestQuery , requestBody.User_id , requestBody.Sport , requestBody.Location , requestBody.Time , requestBody.CourtPrice)
+	err := db.Get(&responseBody , pkg.CreateRequestQuery , requestBody.User_id , requestBody.Sport , requestBody.Location , requestBody.Time , requestBody.CourtPrice)
 	if err != nil {
 		return Request{} , err 
 	}
