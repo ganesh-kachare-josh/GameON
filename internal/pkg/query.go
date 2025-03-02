@@ -28,7 +28,7 @@ const GetSportByRequestId = "SELECT sport from requests WHERE id = $1"
 
 
 // Profile Queries 
-const GetUserByIdQuery = "SELECT id , name , email , sports , phone_number FROM users WHERE id = $1" 
+const GetUserByIdQuery = "SELECT id , name , email , sports , phone_number , created_at FROM users WHERE id = $1" 
 
 const UpdateUserByIdQuery = "UPDATE users SET name = $2, email = $3, sports = $4, phone_number = $5 WHERE id = $1 RETURNING id, name, email, sports, phone_number"
 

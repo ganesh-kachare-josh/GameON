@@ -164,9 +164,8 @@ func ConfirmRequest(confirmRequestService Service) (func (w http.ResponseWriter 
 			http.Error(w ,"failed to decode request body",http.StatusInternalServerError) 
 			return 
 		}
-
-		body.Request_id = request_id 
-
+		
+		body.Request_id = request_id
 		response , emailResponse , err  := confirmRequestService.ConfirmRequest(ctx , body) 
 		if err != nil {
 			http.Error(w,err.Error(),http.StatusInternalServerError)

@@ -62,6 +62,7 @@ type UserData struct {
 	Email        string          `db:"email"`
 	Sports       json.RawMessage `db:"sports"`
 	Phone_Number string          `db:"phone_number"`
+	Created_at   time.Time       `db:"created_at"`
 }
 
 type LoginResponse struct {
@@ -76,8 +77,8 @@ type LogoutResponse struct {
 }
 
 type ResponseForEmail struct {
-	CreatorName string  
+	CreatorName     string
 	ParticipantName string
-    Sport string
-	Email string
+	Sport           string
+	Email           string
 }
