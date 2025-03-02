@@ -2,7 +2,7 @@ package pkg
 
 
 // Request Queries
-const GetRequestByIdQuery = "SELECT id , user_id , sport , location , time , court_price , status FROM requests WHERE id = $1"
+const GetRequestByIdQuery = "SELECT requests.id, requests.user_id, requests.sport, requests.location, requests.time,requests.court_price, requests.status, users.name, users.email, users.phone_number FROM requests JOIN users ON requests.user_id = users.id WHERE requests.id = $1"
 
 const GetAllRequestsQuery = "SELECT requests.id, requests.user_id, requests.sport, requests.location, requests.time,requests.court_price, requests.status, users.name, users.email, users.phone_number FROM requests JOIN users ON requests.user_id = users.id"
 
