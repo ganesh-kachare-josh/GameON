@@ -1,0 +1,26 @@
+mode: set
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:10.85,11.54 1 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:11.54,16.17 4 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:16.17,19.4 2 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:21.3,22.17 2 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:22.17,25.4 2 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:27.3,30.17 4 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:30.17,32.4 1 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:37.92,38.54 1 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:38.54,43.15 4 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:43.15,46.4 2 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:47.3,48.17 2 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:48.17,51.4 2 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:53.3,54.17 2 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:54.17,57.4 2 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:59.3,62.17 4 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/handler.go:62.17,64.4 1 0
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/service.go:18.59,22.2 1 1
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/service.go:24.106,26.16 2 1
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/service.go:26.16,28.3 1 1
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/service.go:29.2,29.38 1 1
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/service.go:32.103,34.16 2 1
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/service.go:34.16,36.3 1 1
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/service.go:37.2,38.29 2 1
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/service.go:38.29,40.3 1 1
+github.com/ganesh-kachare-josh/GameON/internal/app/rating/service.go:41.2,41.20 1 1
