@@ -5,6 +5,7 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"strconv"
+	"log"
 )
 
 func GiveRating(ratingService Service) func(w http.ResponseWriter, r *http.Request) {
@@ -14,12 +15,14 @@ func GiveRating(ratingService Service) func(w http.ResponseWriter, r *http.Reque
 		var requestBody RatingRequestBody
 		err := json.NewDecoder(r.Body).Decode(&requestBody)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, "error in decoding the request", http.StatusInternalServerError)
 			return
 		}
 
 		response, err := ratingService.GiveRating(ctx, requestBody)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -28,6 +31,7 @@ func GiveRating(ratingService Service) func(w http.ResponseWriter, r *http.Reque
 		w.WriteHeader(http.StatusOK)
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 
@@ -46,12 +50,14 @@ func GetRatingByUserId(ratingService Service) func(w http.ResponseWriter, r *htt
 		}
 		user_id, err := strconv.Atoi(id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		response, err := ratingService.GetRatingByUserId(ctx, user_id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -60,6 +66,7 @@ func GetRatingByUserId(ratingService Service) func(w http.ResponseWriter, r *htt
 		w.WriteHeader(http.StatusOK)
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 

@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 
 	"github.com/ganesh-kachare-josh/GameON/internal/pkg"
 	"github.com/jmoiron/sqlx"
@@ -40,6 +41,7 @@ func (rp repoPerson) GetRequestById(ctx context.Context , request_id int) (Reque
 	
 	err := db.Get(&request , pkg.GetRequestByIdQuery , request_id)  
 	if err != nil {
+		log.Println(err)
 		return Request{} , err 
 	}
 
@@ -53,6 +55,7 @@ func (rp repoPerson) GetAllRequests(ctx context.Context) ([]Request , error) {
 
 	err := db.Select(&requests ,pkg.GetAllRequestsQuery)  
 	if err != nil {
+		log.Println(err)
 		return []Request{} , err 
 	}
     
@@ -66,6 +69,7 @@ func (rp repoPerson) GetAllParticipants(ctx context.Context , request_id int) ([
 
 	err := db.Select(&participants ,pkg.GetAllParticipantsQuery , request_id)
 	if err != nil {
+		log.Println(err)
 		return []ParticipantData{}
 	}
 	return participants
@@ -78,18 +82,21 @@ func (rp repoPerson) AcceptRequest(ctx context.Context , requestBody AcceptReque
 
 	err := db.Get(&data , pkg.AcceptRequestQuery , requestBody.Request_id, requestBody.User_id , "Pending")
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} , ResponseForEmail{} , err
 	}
 
 	var userId int 
 	err = db.Get(&userId , pkg.GetUserIdByRequestId , requestBody.Request_id)
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} , ResponseForEmail{} , nil 
 	} 
 
 	var email string 
 	err = db.Get(&email , pkg.GetEmailById , userId) 
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} , ResponseForEmail{} , err 
 	}
 
@@ -99,21 +106,25 @@ func (rp repoPerson) AcceptRequest(ctx context.Context , requestBody AcceptReque
 
 	err = db.Get(&creatorName , pkg.GetNameByIdQuery , userId) 
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} ,  ResponseForEmail{} , errors.New("user doesn't exist") 
 	}
 
 	err = db.Get(&ParticipantName , pkg.GetNameByIdQuery , requestBody.User_id) 
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} , ResponseForEmail{} ,  errors.New("participant doesn't exist") 
 	}
 
 	err = db.Get(&sport , pkg.GetSportByRequestId , requestBody.Request_id) 
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} , ResponseForEmail{} , errors.New("participant doesn't exist") 
 	}
 	var sportMap map[string]string 
 	err = json.Unmarshal(sport , &sportMap) 
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} , ResponseForEmail{} , errors.New("error unmarshaling sport")
 	}
 
@@ -140,18 +151,21 @@ func (rp repoPerson) ConfirmRequest(ctx context.Context , requestBody AcceptRequ
 
 	err := db.Get(&data , pkg.ConfirmRequestQuery , requestBody.Request_id , requestBody.User_id)
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} ,ResponseForEmail{}, err 
 	}
 
 	var email string 
 	err = db.Get(&email , pkg.GetEmailById , requestBody.User_id) 
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} ,ResponseForEmail{}, err 
 	} 
 
 	var userId int 
 	err = db.Get(&userId , pkg.GetUserIdByRequestId , requestBody.Request_id)
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} , ResponseForEmail{}, nil 
 	}
 
@@ -160,16 +174,19 @@ func (rp repoPerson) ConfirmRequest(ctx context.Context , requestBody AcceptRequ
 
 	err = db.Get(&creatorName , pkg.GetNameByIdQuery , userId) 
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} , ResponseForEmail{} , errors.New("user doesn't exist") 
 	}
 
 	err = db.Get(&sport , pkg.GetSportByRequestId , requestBody.Request_id) 
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} , ResponseForEmail{} , errors.New("participant doesn't exist") 
 	}
 	var sportMap map[string]string 
 	err = json.Unmarshal(sport , &sportMap) 
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} , ResponseForEmail{} , errors.New("error unmarshaling sport")
 	}
 
@@ -193,6 +210,7 @@ func (rp  repoPerson) DeleteRequest(ctx context.Context , request_id int) (sql.R
 	
 	result , err := db.Exec(pkg.DeleteRequestQuery , request_id) 
 	if err != nil {
+		log.Println(err)
 		return result , fmt.Errorf("failed to delete item: %v", err)	
 	}
     
@@ -205,24 +223,28 @@ func (rp repoPerson) RejectParticipant(ctx context.Context , participant_id int)
 	var user_id int 
 	err := db.Get(&user_id , "SELECT user_id from participants WHERE id = $1" , participant_id) 
 	if err != nil {
+		log.Println(err)
 		return ResponseForEmail{} , err 
 	}	
 
 	var email string 
 	err = db.Get(&email , pkg.GetEmailById , user_id) 
 	if err != nil {
+		log.Println(err)
 		return ResponseForEmail{} , err
 	}
 
 	var request_id int 
 	err = db.Get(&request_id , "SELECT request_id from participants WHERE id = $1" , participant_id) 
 	if err != nil {
+		log.Println(err)
 		return ResponseForEmail{} , err 
 	}
 
 	var creator_id int 
 	err = db.Get(&creator_id , "SELECT user_id from requests WHERE id = $1" , request_id) 
 	if err != nil {
+		log.Println(err)
 		return ResponseForEmail{} , err 
 	}
 
@@ -231,16 +253,19 @@ func (rp repoPerson) RejectParticipant(ctx context.Context , participant_id int)
 
 	err = db.Get(&creatorName , pkg.GetNameByIdQuery , creator_id) 
 	if err != nil {
+		log.Println(err)
 		return ResponseForEmail{} , err 
 	}
 
 	err = db.Get(&sport , pkg.GetSportByRequestId , request_id) 
 	if err != nil {
+		log.Println(err)
 		return ResponseForEmail{} , err  
 	}
 	var sportMap map[string]string 
-	err = json.Unmarshal(sport , &sportMap) 
+	err = json.Unmarshal(sport , &sportMap)
 	if err != nil {
+		log.Println(err) 
 		return ResponseForEmail{} , err 
 	}
 
@@ -258,6 +283,7 @@ func (rp repoPerson) RejectParticipant(ctx context.Context , participant_id int)
 
 	_, err = db.Exec(pkg.RejectParticipantQuery , participant_id)  
 	if err != nil {
+		log.Println(err)
 		return ResponseForEmail{} , fmt.Errorf("failed to delete item: %v", err)	
 	}
 
@@ -270,6 +296,7 @@ func (rp repoPerson) CreateRequest(ctx context.Context , requestBody Request) (R
 	var responseBody Request 
 	err := db.Get(&responseBody , pkg.CreateRequestQuery , requestBody.User_id , requestBody.Sport , requestBody.Location , requestBody.Time , requestBody.CourtPrice)
 	if err != nil {
+		log.Println(err)
 		return Request{} , err 
 	}
 	return responseBody , nil 
@@ -280,8 +307,9 @@ func (rp repoPerson) GetJoinedRequestById(ctx context.Context , user_id int )([]
 
 	var data []int 
 
-	err := db.Select(&data , pkg.GetJoinedRequestByIdQuery , user_id) 
+	err := db.Select(&data , pkg.GetJoinedRequestByIdQuery , user_id)  
 	if err != nil {
+		log.Println(err)
 		return []int{} , err 
 	}
 	return data , nil 

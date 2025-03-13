@@ -2,6 +2,7 @@ package profile
 
 import (
 	"context"
+	"log"
 
 	"github.com/ganesh-kachare-josh/GameON/internal/repository"
 )
@@ -18,6 +19,7 @@ type Service interface {
 func (s *service) GetUserById(ctx context.Context, user_id int) (UserData, error) {
 	response, err := s.profileRepo.GetUserById(ctx, user_id)
 	if err != nil {
+		log.Println(err)
 		return UserData{}, err
 	}
 	return UserData(response), nil
@@ -26,6 +28,7 @@ func (s *service) GetUserById(ctx context.Context, user_id int) (UserData, error
 func (s *service) UpdateProfile(ctx context.Context , requestBody UserData)(UserData , error) {
 	response , err :=  s.profileRepo.UpdateProfile(ctx , repository.UserData(requestBody))
 	if err != nil {
+		log.Println(err)
 		return UserData{} , err 
 	}
 	return UserData(response) , nil 

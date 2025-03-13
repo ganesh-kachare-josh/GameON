@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"log"
 
 	"github.com/ganesh-kachare-josh/GameON/internal/pkg"
 	"github.com/jmoiron/sqlx"
@@ -35,6 +36,7 @@ func (ra repoAuth) Login(ctx context.Context, requestBody Login) (LoginResponse,
 
 	err := db.Get(&login, "SELECT id , email , name , password FROM users WHERE email = $1", requestBody.Email)
 	if err != nil {
+		log.Println(err)
 		return LoginResponse{}, errors.New("incorrect email")
 	}
 
@@ -46,6 +48,7 @@ func (ra repoAuth) Login(ctx context.Context, requestBody Login) (LoginResponse,
 	// Generating JWT Token.
 	tokenString, err := pkg.GenerateToken(login.Id)
 	if err != nil {
+		log.Println(err)
 		return LoginResponse{}, err
 	}
 
@@ -65,6 +68,7 @@ func (ra repoAuth) Register(ctx context.Context, requestBody Register) (Register
 	originalPassword := requestBody.Password
 	hashedPassword, err := pkg.HashPassword(originalPassword)
 	if err != nil {
+		log.Println(err)
 		return Register{}, err
 	}
 
@@ -73,6 +77,7 @@ func (ra repoAuth) Register(ctx context.Context, requestBody Register) (Register
 	err = db.Get(&register, pkg.RegisterUserQuery, requestBody.Name, requestBody.Email, requestBody.Password, requestBody.Phone_Number, requestBody.Sport)
 
 	if err != nil {
+		log.Println(err)
 
 		if pqErr, ok := err.(*pq.Error); ok {
 			if pqErr.Code == "23505" { // 23505 is the error code for unique violation

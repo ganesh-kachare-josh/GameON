@@ -6,6 +6,7 @@ import (
     "net/http"
     "strings"
     "time"
+    "log"
 
     "github.com/ganesh-kachare-josh/GameON/internal/pkg"
     "github.com/ganesh-kachare-josh/GameON/internal/repository"
@@ -18,6 +19,7 @@ func Login(authService Service) func(w http.ResponseWriter, r *http.Request) {
 
         err := json.NewDecoder(r.Body).Decode(&login)
         if err != nil {
+            log.Println(err)
             http.Error(w, err.Error(), http.StatusBadRequest)
             return
         }
@@ -26,6 +28,7 @@ func Login(authService Service) func(w http.ResponseWriter, r *http.Request) {
 
         response, err := authService.Login(ctx, login)
         if err != nil {
+            log.Println(err)
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return
         }
@@ -45,6 +48,7 @@ func Login(authService Service) func(w http.ResponseWriter, r *http.Request) {
         w.WriteHeader(http.StatusOK)
         err = json.NewEncoder(w).Encode(response)
         if err != nil {
+            log.Println(err)
             http.Error(w, err.Error(), http.StatusInternalServerError)
         }
     }
@@ -57,6 +61,7 @@ func Register(authService Service) func(w http.ResponseWriter, r *http.Request) 
 
         err := json.NewDecoder(r.Body).Decode(&register)
         if err != nil {
+            log.Println(err)
             http.Error(w, err.Error(), http.StatusBadRequest)
             return
         }
@@ -65,6 +70,7 @@ func Register(authService Service) func(w http.ResponseWriter, r *http.Request) 
 
         register, err = authService.Register(ctx, register)
         if err != nil {
+            log.Println(err)
             http.Error(w, err.Error(), http.StatusInternalServerError)
             return
         }
@@ -73,6 +79,7 @@ func Register(authService Service) func(w http.ResponseWriter, r *http.Request) 
 
         err = json.NewEncoder(w).Encode(register)
         if err != nil {
+            log.Println(err)
             http.Error(w, err.Error(), http.StatusInternalServerError)
         }
 
@@ -90,6 +97,7 @@ func IsLogin(authService Service) func(w http.ResponseWriter, r *http.Request) {
             loginstatus.Is_login = false
             err := json.NewEncoder(w).Encode(loginstatus)
             if err != nil {
+                log.Println(err)
                 http.Error(w, err.Error(), http.StatusInternalServerError)
             }
             return
@@ -102,6 +110,7 @@ func IsLogin(authService Service) func(w http.ResponseWriter, r *http.Request) {
             loginstatus.Is_login = false
             err := json.NewEncoder(w).Encode(loginstatus)
             if err != nil {
+                log.Println(err)
                 http.Error(w, err.Error(), http.StatusInternalServerError)
             }
             return
@@ -110,10 +119,12 @@ func IsLogin(authService Service) func(w http.ResponseWriter, r *http.Request) {
         user_id, err := pkg.GetUserIdFromToken(tokenString)
 
         if err != nil {
+            log.Println(err)
             loginstatus.User_id = 0
             loginstatus.Is_login = false
             err := json.NewEncoder(w).Encode(loginstatus)
             if err != nil {
+                log.Println(err)
                 http.Error(w, err.Error(), http.StatusInternalServerError)
             }
             return
@@ -123,6 +134,7 @@ func IsLogin(authService Service) func(w http.ResponseWriter, r *http.Request) {
         loginstatus.Is_login = true
         err = json.NewEncoder(w).Encode(loginstatus)
         if err != nil {
+            log.Println(err)
             http.Error(w, err.Error(), http.StatusInternalServerError)
         }
 

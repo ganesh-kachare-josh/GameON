@@ -4,6 +4,7 @@ import (
 	"errors"
 	"os"
 	"time"
+	"log"
 
 	"github.com/golang-jwt/jwt"
 	"github.com/joho/godotenv"
@@ -13,6 +14,7 @@ func GenerateToken(userID int) (string, error) {
 
 	err := godotenv.Load("../.env")
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 
@@ -27,6 +29,7 @@ func GenerateToken(userID int) (string, error) {
 	secret := os.Getenv("jwt_secret_key") 
 	jwtToken, err := token.SignedString([]byte(secret))
 	if err != nil {
+		log.Println(err)
 		return "", err
 	}
 	return jwtToken, nil
@@ -37,6 +40,7 @@ func VerifyToken(tokenString string) (*jwt.Token, error) {
 
 	err := godotenv.Load("../.env")
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -47,6 +51,7 @@ func VerifyToken(tokenString string) (*jwt.Token, error) {
 
 	// Check for verification errors
 	if err != nil {
+		log.Println(err)
 		return nil, err
 	}
 
@@ -62,6 +67,7 @@ func VerifyToken(tokenString string) (*jwt.Token, error) {
 func GetUserIdFromToken(tokenString string) (int , error) {
 	token , err := VerifyToken(tokenString) 
 	if err != nil {
+		log.Println(err)
 		return 0 , err 
 	} 
 

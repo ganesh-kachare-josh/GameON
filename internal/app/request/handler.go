@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"log"
 
 	"github.com/gorilla/mux"
 	"github.com/ganesh-kachare-josh/GameON/internal/pkg"
@@ -24,12 +25,14 @@ func GetRequestById(requestService Service)(func (w http.ResponseWriter , r *htt
 		}
 		request_id,err := strconv.Atoi(id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusBadRequest)
 			return
 		} 
 
 		response , err := requestService.GetRequestById(ctx , request_id) 
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 			return 
 		}
@@ -37,6 +40,7 @@ func GetRequestById(requestService Service)(func (w http.ResponseWriter , r *htt
 		w.WriteHeader(http.StatusOK) 
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 		}		
 	}
@@ -48,6 +52,7 @@ func GetAllRequests(requestService Service)(func (w http.ResponseWriter , r *htt
 
 		response , err := requestService.GetAllRequests(ctx) 
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 			return 
 		}
@@ -57,6 +62,7 @@ func GetAllRequests(requestService Service)(func (w http.ResponseWriter , r *htt
 		
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 		}		
 	}
@@ -75,6 +81,7 @@ func GetAllParticipants(participantService Service) (func (w http.ResponseWriter
 
 		request_id,err := strconv.Atoi(id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusBadRequest)
 			return
 		} 
@@ -85,6 +92,7 @@ func GetAllParticipants(participantService Service) (func (w http.ResponseWriter
 		w.WriteHeader(http.StatusOK) 
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 		}
 
@@ -104,6 +112,7 @@ func AcceptRequest(acceptRequestService Service) (func (w http.ResponseWriter , 
 
 		request_id,err := strconv.Atoi(id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusBadRequest)
 			return
 		}
@@ -111,6 +120,7 @@ func AcceptRequest(acceptRequestService Service) (func (w http.ResponseWriter , 
 		var body AcceptRequestBody 
 		err = json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
+			log.Println(err)
 			http.Error(w ,"failed to decode request body",http.StatusInternalServerError) 
 			return 
 		}
@@ -119,6 +129,7 @@ func AcceptRequest(acceptRequestService Service) (func (w http.ResponseWriter , 
 
 		response , emailResponse , err := acceptRequestService.AcceptRequest(ctx , body )
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 			return
 		}
@@ -127,6 +138,7 @@ func AcceptRequest(acceptRequestService Service) (func (w http.ResponseWriter , 
 		w.WriteHeader(http.StatusOK) 
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 		}
 		go func(){
@@ -135,6 +147,7 @@ func AcceptRequest(acceptRequestService Service) (func (w http.ResponseWriter , 
 				fmt.Sprintf("Great news! %v has accepted your game request to play %v. Get ready to jump into action and enjoy the thrill! 🚀\n\nLog in now to check the details and start gaming!\n\nHappy Gaming! 🎮" , emailResponse.ParticipantName , emailResponse.Sport),
 				)
 				if err != nil {
+					log.Println(err)
 					http.Error(w,err.Error(),http.StatusInternalServerError)
 				}
 		}()
@@ -155,6 +168,7 @@ func ConfirmRequest(confirmRequestService Service) (func (w http.ResponseWriter 
 
 		request_id,err := strconv.Atoi(id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusBadRequest)
 			return
 		}
@@ -162,6 +176,7 @@ func ConfirmRequest(confirmRequestService Service) (func (w http.ResponseWriter 
 		var body AcceptRequestBody 
 		err = json.NewDecoder(r.Body).Decode(&body)
 		if err != nil {
+			log.Println(err)
 			http.Error(w ,"failed to decode request body",http.StatusInternalServerError) 
 			return 
 		}
@@ -169,6 +184,7 @@ func ConfirmRequest(confirmRequestService Service) (func (w http.ResponseWriter 
 		body.Request_id = request_id
 		response , emailResponse , err  := confirmRequestService.ConfirmRequest(ctx , body) 
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 			return
 		}
@@ -176,6 +192,7 @@ func ConfirmRequest(confirmRequestService Service) (func (w http.ResponseWriter 
 		w.WriteHeader(http.StatusOK) 
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 		}
 		go func(){
@@ -184,6 +201,7 @@ func ConfirmRequest(confirmRequestService Service) (func (w http.ResponseWriter 
 				fmt.Sprintf("Congratulations! %v has accepted your join request to play %v. You're now part of the squad! 🔥\n\nPrepare yourself, gear up, and get ready for an epic gaming session.\n\nSee you in the game! 🎮",emailResponse.CreatorName , emailResponse.Sport),
 				)
 				if err != nil {
+					log.Println(err)
 					http.Error(w,err.Error(),http.StatusInternalServerError)
 				}	
 		}()
@@ -204,18 +222,21 @@ func DeleteRequest(deleteRequest Service) (func (w http.ResponseWriter , r *http
 
 		request_id,err := strconv.Atoi(id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusBadRequest)
 			return
 		}
 
 		result , err := deleteRequest.DeleteRequest(ctx , request_id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w,fmt.Sprintf("failed to delete request: %v", err),http.StatusInternalServerError)
 			return
 		}
 
 		rowsAffected, err := result.RowsAffected()
 		if err != nil {
+			log.Println(err)
 			http.Error(w, fmt.Sprintf("error checking rows affected: %v", err), http.StatusInternalServerError)
 			return
 		}
@@ -247,12 +268,14 @@ func RejectParticipant(rejectRequest Service) (func (w http.ResponseWriter , r *
 		}
 		participant_id,err := strconv.Atoi(id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusBadRequest)
 			return
 		} 
 
 		emailResponse , err := rejectRequest.RejectParticipant(ctx , participant_id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w,fmt.Sprintf("failed to delete request: %v", err),http.StatusInternalServerError)
 			return
 		}
@@ -272,6 +295,7 @@ func RejectParticipant(rejectRequest Service) (func (w http.ResponseWriter , r *
 				fmt.Sprintf("Hey there, unfortunately, your request to join the game %v was not accepted this time. But don’t worry, new opportunities are always around the corner! 🌟\n\nKeep exploring, find another game, and show them what they’re missing!\n\nBetter luck next time! 🎮",emailResponse.Sport), 
 			)
 			if err != nil {
+				log.Println(err)
 				http.Error(w,err.Error(),http.StatusInternalServerError)
 			}
 		}()
@@ -287,12 +311,14 @@ func CreateRequest(createRequest Service) func (w http.ResponseWriter , r *http.
 
 		err := json.NewDecoder(r.Body).Decode(&requestBody)
 		if err != nil {
+			log.Println(err)
 			http.Error(w , fmt.Sprintf("failed to decode the request body: %v" , err) , http.StatusInternalServerError)
 			return
 		}
 
 		response , err := createRequest.CreateRequest(ctx , requestBody)
 		if err != nil {
+			log.Println(err)
 			http.Error(w , fmt.Sprintf("failed to create request: %v" ,err ) , http.StatusInternalServerError)
 			return
 		}
@@ -301,6 +327,7 @@ func CreateRequest(createRequest Service) func (w http.ResponseWriter , r *http.
 		w.WriteHeader(http.StatusCreated)
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {	
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 		}
 
@@ -326,6 +353,7 @@ func GetJoinedRequestById(requestService Service) (func (w http.ResponseWriter ,
 		
         user_id, err := pkg.GetUserIdFromToken(tokenString)
 		if err != nil {
+			log.Println(err)
 			http.Error(w , err.Error() , http.StatusInternalServerError)
 			return
 		}
@@ -335,6 +363,7 @@ func GetJoinedRequestById(requestService Service) (func (w http.ResponseWriter ,
 
 		res , err = requestService.GetJoinedRequestById(ctx , user_id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w , err.Error() , http.StatusInternalServerError)
 			return 
 		}
@@ -344,6 +373,7 @@ func GetJoinedRequestById(requestService Service) (func (w http.ResponseWriter ,
 		w.WriteHeader(http.StatusOK)
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {	
+			log.Println(err)
 			http.Error(w,err.Error(),http.StatusInternalServerError)
 		}
 	}

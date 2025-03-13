@@ -43,6 +43,6 @@ func main() {
 		Handler: handler,
 	}
 
-	fmt.Printf("Server is running on port : %v" , os.Getenv("port")) 
+	fmt.Printf("Server is running on port : %v\n" , os.Getenv("port")) 
 	log.Fatal(srv.ListenAndServe())
 }

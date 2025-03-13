@@ -3,7 +3,7 @@ package repository
 import (
 	"context"
 	"database/sql"
-	
+	"log"
 
 	"github.com/ganesh-kachare-josh/GameON/internal/pkg"
 	"github.com/jmoiron/sqlx"
@@ -23,6 +23,7 @@ func (rr repoRating) GiveRating(ctx context.Context , requestBody RatingRequestB
 
 	_ , err := db.Exec(pkg.GiveRatingQuery ,requestBody.GivenBy , requestBody.GivenTo , requestBody.Request_id , requestBody.Rating,requestBody.Feedback) 
 	if err != nil {
+		log.Println(err)
 		return RatingResponse{} , err  
 	}
 
@@ -38,6 +39,7 @@ func (rr repoRating) GetRatingByUserId(ctx context.Context , user_id int) ([]Rat
 	var response []RatingUserIdResponse 
 	err := db.Select(&response , pkg.GetRatingByUserIdQuery , user_id) 
 	if err != nil {
+		log.Println(err)
 		return []RatingUserIdResponse{} , err 
 	}
 	return response , nil 

@@ -3,6 +3,7 @@ package request
 import (
 	"context"
 	"database/sql"
+	"log"
 
 	"github.com/ganesh-kachare-josh/GameON/internal/repository"
 ) 
@@ -26,6 +27,7 @@ type Service interface {
 func (s *service ) GetRequestById(ctx context.Context , request_id int) (Request , error) {
 	    request , err := s.requestRepo.GetRequestById(ctx , request_id) 
 		if err != nil {
+			log.Println(err)
 			return Request{} , err 
 		}
 		return Request(request) , nil 
@@ -34,6 +36,7 @@ func (s *service ) GetRequestById(ctx context.Context , request_id int) (Request
 func (s *service ) GetAllRequests(ctx context.Context) ([]Request, error) {
 	    requests , err := s.requestRepo.GetAllRequests(ctx) 
 		if err != nil {
+			log.Println(err)
 			return []Request{} , err 
 		}
 		// var Requests []Request
@@ -56,6 +59,7 @@ func (s *service) GetAllParticipants(ctx context.Context , request_id int) ([]Pa
 func (s *service) AcceptRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , ResponseForEmail , error) {
 	response , emailResponse , err := s.requestRepo.AcceptRequest(ctx , repository.AcceptRequestBody(requestBody))
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} , ResponseForEmail{} , err 
 	} 
 	return AcceptRequestData(response) , ResponseForEmail(emailResponse) , nil  
@@ -64,6 +68,7 @@ func (s *service) AcceptRequest(ctx context.Context , requestBody AcceptRequestB
 func (s *service) ConfirmRequest(ctx context.Context , requestBody AcceptRequestBody) (AcceptRequestData , ResponseForEmail , error) {
 	response , emailResponse , err  := s.requestRepo.ConfirmRequest(ctx , repository.AcceptRequestBody(requestBody))
 	if err != nil {
+		log.Println(err)
 		return AcceptRequestData{} , ResponseForEmail{} , err 
 	}
 	return AcceptRequestData(response) , ResponseForEmail(emailResponse) , nil 
@@ -76,6 +81,7 @@ func (s *service) DeleteRequest(ctx context.Context , request_id int) (sql.Resul
 func (s *service) RejectParticipant(ctx context.Context , participant_id int) (ResponseForEmail , error) {
 	emailResponse , err :=  s.requestRepo.RejectParticipant(ctx , participant_id)
 	if err != nil {
+		log.Println(err)
 		return ResponseForEmail{} , err 
 	}
 	return ResponseForEmail(emailResponse) , nil 
@@ -84,6 +90,7 @@ func (s *service) RejectParticipant(ctx context.Context , participant_id int) (R
 func (s *service) CreateRequest(ctx context.Context , requestBody Request) (Request, error) {
 	response , err := s.requestRepo.CreateRequest(ctx , repository.Request(requestBody))
 	if err != nil {
+		log.Println(err)
 		return Request{} , err 
 	}
 	return Request(response) , nil 

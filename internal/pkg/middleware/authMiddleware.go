@@ -3,6 +3,7 @@ package middleware
 import (
 	"net/http"
 	"strings"
+	"log"
 	"github.com/ganesh-kachare-josh/GameON/internal/pkg"
 )
 func AuthenticationMiddleware(next http.HandlerFunc) http.HandlerFunc {
@@ -25,6 +26,7 @@ func AuthenticationMiddleware(next http.HandlerFunc) http.HandlerFunc {
 		// Verify the token
 		_, err := pkg.VerifyToken(token)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, "Unauthorized: Invalid token", http.StatusUnauthorized)
 			return
 		}

@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"github.com/ganesh-kachare-josh/GameON/internal/pkg"
+	"log"
 
 )
 
@@ -22,12 +23,14 @@ func GetUserById(profileService Service) func(w http.ResponseWriter, r *http.Req
 		}
 		user_id, err := strconv.Atoi(id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}
 
 		response, err := profileService.GetUserById(ctx, user_id)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
@@ -36,6 +39,7 @@ func GetUserById(profileService Service) func(w http.ResponseWriter, r *http.Req
 		w.WriteHeader(http.StatusOK)
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
+			log.Println(err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 			return
 		}
@@ -61,6 +65,7 @@ func UpdateProfile(profileService Service) func(w http.ResponseWriter , r *http.
 		
         user_id, err := pkg.GetUserIdFromToken(tokenString)
 		if err != nil {
+			log.Println(err)
 			http.Error(w , err.Error() , http.StatusInternalServerError)
 			return
 		}
@@ -68,6 +73,7 @@ func UpdateProfile(profileService Service) func(w http.ResponseWriter , r *http.
 		var requestBody UserData 
 		err = json.NewDecoder(r.Body).Decode(&requestBody)
 		if err != nil {
+			log.Println(err)
 			http.Error(w , "error decoding the request body" , http.StatusInternalServerError)
 			return 
 		}
@@ -77,6 +83,7 @@ func UpdateProfile(profileService Service) func(w http.ResponseWriter , r *http.
 
 		response , err := profileService.UpdateProfile(ctx , requestBody)
 		if err != nil {
+			log.Println(err)
 			http.Error(w , err.Error() , http.StatusInternalServerError)
 			return 
 		}
@@ -85,6 +92,7 @@ func UpdateProfile(profileService Service) func(w http.ResponseWriter , r *http.
 		w.WriteHeader(http.StatusOK)
 		err = json.NewEncoder(w).Encode(response)
 		if err != nil {
+			log.Println(err)
 			http.Error(w , "error in encoding the response" , http.StatusInternalServerError)
 			return 
 		}
